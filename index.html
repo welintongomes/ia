@@ -1,0 +1,2392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA Conhecimentos</title>
+    <style>
+        /* ========================================
+   RESET E CONFIGURAÇÕES GLOBAIS
+   ======================================== */
+
+        * {
+            border-radius: 5px;
+            margin: 1px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* ========================================
+   CONTAINER PRINCIPAL
+   ======================================== */
+
+        .container {
+            max-width: 100%;
+            margin: 120px auto 0 auto;
+            /* Espaço para navbar fixa */
+            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px 20px 0 0;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* ========================================
+   NAVEGAÇÃO (NAVBAR E TABS)
+   ======================================== */
+
+        /* Navbar fixa no topo */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 0px 20px;
+        }
+
+        /* Estilo especial quando aba "Gerenciar" está ativa */
+        body.aba-manage .navbar {
+            background: rgba(240, 248, 255, 0.95);
+            border-bottom: 1px solid rgba(108, 142, 251, 0.2);
+            box-shadow: 0 4px 10px rgba(108, 142, 251, 0.1);
+        }
+
+        /* Container das abas */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        /* Estilo base das abas */
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        /* Aba ativa */
+        .nav-tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Hover em abas inativas */
+        .nav-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* ========================================
+   SEÇÕES DE CONTEÚDO
+   ======================================== */
+
+        .content-section {
+            display: none;
+            padding: 1px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Animação de entrada */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========================================
+        BARRA DE PESQUISA
+        ======================================== */
+
+        /* Container da barra de pesquisa */
+        .search-container {
+            position: relative;
+            margin-bottom: 0px;
+        }
+
+        /* Barra de pesquisa moderna */
+        .search-bar-modern {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Input de pesquisa */
+        .search-input,
+        .search-bar-modern input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 25px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus,
+        .search-bar-modern input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Botão de pesquisa */
+        .search-btn,
+        .search-bar-modern button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover,
+        .search-bar-modern button:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* ========================================
+   CARDS E CONTAINERS
+   ======================================== */
+
+        /* Card base */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0 5px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Header do card */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Cards de ação (gerenciamento) */
+        .management-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 2px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* ========================================
+   BOTÕES
+   ======================================== */
+
+        /* Botão base */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Variações de botões */
+        .btn-edit {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-delete {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            font-size: 14px;
+        }
+
+        /* Botão moderno */
+        .btn-modern {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            opacity: 0.95;
+        }
+
+        .btn-modern:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+            opacity: 0.9;
+        }
+
+        /* Botão mini (sem bordas) */
+        .btn-mini {
+            border: none;
+            outline: none;
+            box-shadow: none;
+            background-color: transparent;
+            padding: 0;
+        }
+
+        /* ========================================
+   EXIBIÇÃO DE CÓDIGO
+   ======================================== */
+
+        /* Container principal do código */
+        .code-container {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        /* Header do código */
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .code-language {
+            color: #4CAF50;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Botão de copiar */
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* Código em conversas */
+        .code-conversa {
+            font-size: 12px;
+        }
+
+        .code-header-conversa {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 12px;
+            background: #2d3748;
+            color: white;
+            font-size: 11px;
+        }
+
+        .code-content {
+            white-space: pre;
+            padding: 10px 12px;
+            background: #1a202c;
+            color: #e2e8f0;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        /* ========================================
+   INTERFACE DE CONVERSA (CHAT)
+   ======================================== */
+
+        /* Container principal da conversa */
+        .conversa-container {
+            margin-top: 20px;
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* Header da conversa */
+        .conversa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Área de scroll da conversa */
+        .conversa-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Item individual da conversa */
+        .conversa-item {
+            margin-bottom: 20px;
+        }
+
+        /* Pergunta do usuário */
+        .pergunta-usuario {
+            margin: 2px 0 12px 0;
+        }
+
+        .pergunta-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #e3f2fd;
+            border-radius: 18px;
+            margin-left: 20%;
+        }
+
+        .pergunta-icon {
+            font-size: 16px;
+        }
+
+        .pergunta-texto {
+            flex: 1;
+            font-size: 14px;
+            color: #1565c0;
+            font-weight: 500;
+        }
+
+        .pergunta-hora {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* Resposta da IA */
+        .resposta-ia {
+            background: #f5f5f5;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-right: 20%;
+        }
+
+        .resposta-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #e8f5e8;
+            font-size: 13px;
+            color: #2e7d32;
+        }
+
+        .resposta-icon {
+            font-size: 16px;
+        }
+
+        .resposta-conteudo {
+            padding: 1px;
+        }
+
+        /* ========================================
+   RESULTADOS E DADOS
+   ======================================== */
+
+        /* Container de resultados do gerenciador */
+        .resultados-gerenciador {
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Itens de resultado */
+        #resultadosGerenciamento>div {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease;
+        }
+
+        #resultadosGerenciamento>div:hover {
+            transform: translateY(-2px);
+        }
+
+        #resultadosPesquisa>div {
+            margin-top: 45px;
+            margin-bottom: 12px;
+            padding: 1px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease;
+        }
+
+        /* Resultado na conversa */
+        .resultado-conversa {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .resultado-conversa-header {
+            display: flex;
+            padding: 10px 1px;
+            background: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+            gap: 12px;
+            flex-direction: row-reverse;
+            align-items: center;
+        }
+
+        .resultado-titulo {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .text-conversa {
+            padding: 10px 12px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #555;
+        }
+
+        /* ========================================
+   MODAL
+   ======================================== */
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* ========================================
+   FORMULÁRIOS
+   ======================================== */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.form-control {
+            white-space: pre;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* ========================================
+   ESTADOS E FEEDBACK
+   ======================================== */
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Sem resultados */
+        .no-results,
+        .sem-resultados {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .mais-resultados {
+            text-align: center;
+            padding: 8px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* css para o microfone */
+        .btn-mic {
+            background: #4CAF50;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 40px;
+            margin-left: 8px;
+        }
+
+        .btn-mic-small {
+            background: #2196F3;
+            border: none;
+            border-radius: 15px;
+            width: 60px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-mic.gravando,
+        .btn-mic-small.gravando {
+            background: #f44336;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* css para microfone de pesquisa rápida */
+        /* css para o microfone */
+        .btn-micvr {
+            background: #4879e5;
+            border: none;
+            border-radius: 40%;
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            font-size: 75px;
+            margin-left: 40%;
+            margin-bottom: 1%;
+        }
+
+        .btn-micvr-small {
+            background: #2196F3;
+            border: none;
+            border-radius: 15px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-micvr.gravando,
+        .btn-micvr-small.gravando {
+            background: #f44336;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* css para leitura em voz alta */
+        .btn-read {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        .btn-read:hover {
+            background: #F57C00;
+        }
+
+        .btn-read.lendo {
+            background: #f44336;
+            animation: pulse 1s infinite;
+        }
+
+        .btn-mini[data-ler] {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-mini[data-ler]:hover {
+            background: #F57C00;
+        }
+
+        .btn-mini[data-ler].lendo {
+            background: #f44336;
+            animation: pulse 1s infinite;
+        }
+
+        /* Modal fullscreen */
+        .modal-fullscreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .modal-fullscreen-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-fullscreen-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            border-bottom: 2px solid #34495e;
+            flex-shrink: 0;
+        }
+
+        .modal-fullscreen-title {
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .modal-fullscreen-close {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .modal-fullscreen-close:hover {
+            background: #c0392b;
+        }
+
+        .modal-fullscreen-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .modal-content-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-content-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .modal-content-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .modal-btn-read {
+            background: #3498db;
+            color: white;
+        }
+
+        .modal-btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+
+        .modal-btn-copy {
+            background: #27ae60;
+            color: white;
+        }
+
+        .modal-code-container {
+            background: #2d3748;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .modal-code-header {
+            background: #4a5568;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-code-language {
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .modal-code-content {
+            padding: 20px;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .modal-text-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        /* Scrollbar customizado */
+        .modal-fullscreen-body::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .modal-fullscreen-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .modal-fullscreen-body::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 6px;
+        }
+
+        .modal-fullscreen-body::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+
+        /* Tablets */
+        @media (max-width: 768px) {
+            .management-actions {
+                margin-top: 8px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .pergunta-header {
+                margin-left: 10%;
+            }
+
+            .resposta-ia {
+                margin-right: 1%;
+            }
+
+            .conversa-scroll {
+                padding: 2px;
+            }
+
+            .nav-tabs {
+                gap: 25px;
+                padding: 0 10px;
+            }
+
+            .nav-tab {
+                padding: 10px 18px;
+                font-size: 13px;
+            }
+
+            .container {
+                padding: 0 10px;
+                margin-top: 70px;
+            }
+
+            .modal-content {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .resultados-gerenciador {
+                max-height: 53vh;
+                margin-top: 50px;
+            }
+        }
+
+        /* Smartphones pequenos */
+        @media (max-width: 400px) {
+            .management-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ========================================
+         BARRA DE NAVEGAÇÃO PRINCIPAL
+    ======================================== -->
+    <nav class="navbar">
+
+        <!-- Abas de navegação (Perguntas e Gerenciar) -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="trocarAba('search')">
+                🔍 Perguntas
+            </button>
+            <button id="micPesquisa" class="btn-mic" title="Falar pergunta">🎤</button>
+            <button class="nav-tab" onclick="trocarAba('manage')">
+                ⚙️ Gerenciar
+            </button>
+        </div>
+
+        <!-- Barra de pesquisa da aba "Perguntas" -->
+        <div id="pesquisaSearch" class="search-container">
+            <input type="text" id="entradaPesquisa" class="search-input"
+                placeholder="Faça uma pergunta... (ex: como criar site em HTML)">
+            <button class="search-btn" onclick="pesquisarConhecimento()">
+                🔍
+            </button>
+        </div>
+
+        <!-- Barra de pesquisa da aba "Gerenciar" (inicialmente oculta) -->
+        <div id="pesquisaManage" class="search-container" style="display: none;">
+            <div class="search-bar-modern">
+                <input id="entradaPesquisaGerenciar" type="text" placeholder="🔍 Buscar conhecimento...">
+                <button id="botaoLimparPesquisa" title="Limpar busca" style="display: none;">
+                    ✖
+                </button>
+            </div>
+        </div>
+
+    </nav>
+
+    <!-- ========================================
+         CONTAINER PRINCIPAL DO CONTEÚDO
+    ======================================== -->
+    <div class="container">
+
+        <!-- ========================================
+             SEÇÃO DE PESQUISA/PERGUNTAS
+        ======================================== -->
+        <div id="search-section" class="content-section active">
+            <!-- Área onde aparecem os resultados das pesquisas -->
+            <div class="resultados-container">
+                <div id="resultadosPesquisa">
+                    <!-- Os resultados da pesquisa aparecerão aqui via JavaScript -->
+                </div>
+            </div>
+            <button id="micPesquisaRapida" class="btn-micvr" title="Pesquisa rápida por voz">🎤</button>
+        </div>
+
+
+        <!-- ========================================
+             SEÇÃO DE GERENCIAMENTO
+        ======================================== -->
+        <div id="manage-section" class="content-section">
+
+            <!-- Área onde aparecem os resultados do gerenciamento -->
+            <div class="resultados-gerenciador">
+                <div id="resultadosGerenciamento">
+                    <!-- Os resultados do gerenciamento aparecerão aqui via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Botões de ação para gerenciar o conhecimento -->
+            <div class="management-actions">
+
+                <!-- Botão para adicionar novo conhecimento -->
+                <div class="action-card" onclick="abrirModal('add')">
+                    <div class="action-icon">➕</div>
+                    <h3>Adicionar</h3>
+                    <p>Novo conhecimento</p>
+                </div>
+
+                <!-- Botão para exportar dados (fazer backup) -->
+                <div class="action-card" onclick="exportarDados()">
+                    <div class="action-icon">📤</div>
+                    <h3>Exportar</h3>
+                    <p>Backup dos dados</p>
+                </div>
+
+                <!-- Botão para importar dados (restaurar backup) -->
+                <div class="action-card" onclick="document.getElementById('arquivoImportar').click()">
+                    <div class="action-icon">📥</div>
+                    <h3>Importar</h3>
+                    <p>Restaurar dados</p>
+                </div>
+
+                <!-- Botão para limpar todos os dados -->
+                <div class="action-card" onclick="limparTodosDados()">
+                    <div class="action-icon">🗑️</div>
+                    <h3>Limpar Tudo</h3>
+                    <p>Apagar todos os dados</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================
+         MODAL PARA ADICIONAR/EDITAR CONHECIMENTO
+    ======================================== -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+
+            <!-- Cabeçalho do modal -->
+            <div class="modal-header">
+                <h2 id="tituloModal">Adicionar Conhecimento</h2>
+                <button class="close-btn" onclick="fecharModal()">
+                    &times;
+                </button>
+            </div>
+
+            <!-- Formulário para inserir dados -->
+            <form id="formularioConhecimento">
+
+                <!-- Campo para a pergunta/título -->
+                <div class="form-group">
+                    <label class="form-label"><button type="button" id="micPergunta" class="btn-mic-small"
+                            title="Falar pergunta">🎤</button> Pergunta/Título</label>
+                    <input type="text" id="entradaPergunta" class="form-control" required>
+
+
+                </div>
+
+                <!-- Campo para selecionar linguagem de programação -->
+                <div class="form-group">
+                    <label class="form-label">Linguagem (opcional)</label>
+                    <select id="selecionarLinguagem" class="form-control">
+                        <option value="">Texto</option>
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="php">PHP</option>
+                        <option value="sql">SQL</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+
+                <!-- Campo para a resposta/código -->
+                <div class="form-group">
+                    <label class="form-label"><button type="button" id="micResposta" class="btn-mic-small"
+                            title="Falar resposta">🎤</button> Resposta/Código</label>
+                    <textarea id="entradaResposta" class="form-control" rows="8" required></textarea>
+                </div>
+
+                <!-- Botão para salvar -->
+                <button type="submit" class="btn btn-primary">
+                    Salvar
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+    <!-- ========================================
+         MODAL PARA EXPANDIR RESPOSTAS CONHECIMENTO
+    ======================================== -->
+    <div id="modalFullscreen" class="modal-fullscreen">
+        <div class="modal-fullscreen-content">
+            <div class="modal-fullscreen-header">
+                <div class="modal-fullscreen-title" id="modalFullscreenTitle"></div>
+                <button class="modal-fullscreen-close" onclick="gc.fecharModalFullscreen()">✕ Fechar</button>
+            </div>
+            <div class="modal-fullscreen-body" id="modalFullscreenBody"></div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         ELEMENTOS OCULTOS
+    ======================================== -->
+    <!-- Input oculto para seleção de arquivo de importação -->
+    <input type="file" id="arquivoImportar" accept=".json" style="display: none;" onchange="importarDados(event)">
+
+    <!-- Aqui você pode adicionar seus arquivos JavaScript -->
+    <script>
+        //📁 1. SEÇÃO DE CONFIGURAÇÃO E INICIALIZAÇÃO
+
+        // =============================================================================
+        // 🚀 CONFIGURAÇÃO E INICIALIZAÇÃO DA APLICAÇÃO
+        // =============================================================================
+
+        // Classe principal para gerenciar o banco de dados de conhecimento e interface do usuário
+        class GerenciadorConhecimento {
+            constructor() {
+                this.nomeBancoDados = 'BancoDadosConhecimento';
+                this.nomeArmazenamento = 'conhecimento';
+                this.bancoDados = null;
+                this.idEdicaoAtual = null;
+                this.conversaPesquisas = []; // histórico da conversa atual
+                this.reconhecimentoVoz = null;
+                this.estadoVoz = 'parado'; // 'parado', 'pesquisa', 'pergunta', 'resposta'
+                this.inicializarVoz();
+                this.sinteseFala = null;
+                this.lendoTexto = false;
+                this.inicializarSinteseFala();
+                this.inicializar();
+            }
+
+            // Inicializa a aplicação configurando o banco de dados e carregando dados iniciais
+            async inicializar() {
+                await this.abrirBancoDados();
+                this.carregarDadosIniciais();
+                this.configurarOuvidoresEventos();
+            }
+
+            // Abre conexão com IndexedDB e cria armazenamento de objetos se necessário
+            async abrirBancoDados() {
+                return new Promise((resolver, rejeitar) => {
+                    const requisicao = indexedDB.open(this.nomeBancoDados, 1);
+
+                    requisicao.onerror = () => rejeitar(requisicao.error);
+                    requisicao.onsuccess = () => {
+                        this.bancoDados = requisicao.result;
+                        resolver();
+                    };
+
+                    requisicao.onupgradeneeded = (evento) => {
+                        const bancoDados = evento.target.result;
+                        if (!bancoDados.objectStoreNames.contains(this.nomeArmazenamento)) {
+                            const armazenamento = bancoDados.createObjectStore(this.nomeArmazenamento, { keyPath: 'id', autoIncrement: true });
+                            armazenamento.createIndex('pergunta', 'pergunta', { unique: false });
+                            armazenamento.createIndex('etiquetas', 'etiquetas', { unique: false, multiEntry: true });
+                        }
+                    };
+                });
+            }
+
+            // Configura todos os ouvintes de eventos para interações do usuário
+            configurarOuvidoresEventos() {
+                document.getElementById('entradaPesquisa').addEventListener('keypress', (evento) => {
+                    if (evento.key === 'Enter') this.pesquisarConhecimento();
+                });
+
+                const entradaGerenciar = document.getElementById('entradaPesquisaGerenciar');
+                const botaoLimpar = document.getElementById('botaoLimparPesquisa');
+
+                entradaGerenciar.addEventListener('input', () => {
+                    const temTexto = entradaGerenciar.value.trim().length > 0;
+                    botaoLimpar.style.display = temTexto ? 'block' : 'none';
+                    this.pesquisarGerenciamento(); // busca em tempo real
+                });
+
+                botaoLimpar.addEventListener('click', () => {
+                    entradaGerenciar.value = '';
+                    botaoLimpar.style.display = 'none';
+                    entradaGerenciar.focus(); // <-- adiciona foco no campo
+                    this.pesquisarGerenciamento(); // resetar
+                });
+
+                document.getElementById('formularioConhecimento').addEventListener('submit', (evento) => {
+                    evento.preventDefault();
+                    this.salvarConhecimento();
+                });
+
+                entradaGerenciar.addEventListener('keydown', (evento) => {
+                    if (evento.key === 'Escape') {
+                        entradaGerenciar.value = '';
+                        botaoLimpar.style.display = 'none';
+                        this.pesquisarGerenciamento();
+                    }
+                });
+                document.getElementById('micPesquisa').addEventListener('click', () => this.iniciarVoz('pesquisa'));
+                document.getElementById('micPergunta').addEventListener('click', () => this.iniciarVoz('pergunta'));
+                document.getElementById('micResposta').addEventListener('click', () => this.iniciarVoz('resposta'));
+                document.getElementById('micPesquisaRapida').addEventListener('click', () => this.iniciarVozRapida());
+
+
+            }
+
+            // Carrega dados iniciais se o banco estiver vazio
+            async carregarDadosIniciais() {
+                const temDados = await this.temAlgumDado();
+                if (!temDados) {
+                    await this.carregarDadosPadrao();
+                }
+                this.exibirMensagemBoasVindas();
+            }
+            //iniciar a pesquisa por voz rápida
+            iniciarVozRapida() {
+                if (!this.reconhecimentoVoz) return;
+
+                this.estadoVoz = 'pesquisa-rapida';
+                this.reconhecimentoVoz.start();
+
+                const btn = document.getElementById('micPesquisaRapida');
+                if (btn) btn.classList.add('gravando');
+            }
+            //funçoes para microfone e leitura
+            inicializarVoz() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    this.reconhecimentoVoz = new SpeechRecognition();
+                    this.reconhecimentoVoz.continuous = false;
+                    this.reconhecimentoVoz.interimResults = false;
+                    this.reconhecimentoVoz.lang = 'pt-BR';
+
+                    this.reconhecimentoVoz.onresult = (e) => {
+                        const texto = e.results[0][0].transcript;
+                        this.processarVoz(texto);
+                    };
+
+                    this.reconhecimentoVoz.onend = () => {
+                        this.pararVoz();
+                    };
+                }
+            }
+
+            iniciarVoz(tipo) {
+                if (!this.reconhecimentoVoz) return;
+
+                this.estadoVoz = tipo;
+                this.reconhecimentoVoz.start();
+
+                // Atualiza visual
+                const btn = document.getElementById(tipo === 'pesquisa' ? 'micPesquisa' :
+                    tipo === 'pergunta' ? 'micPergunta' : 'micResposta');
+                if (btn) btn.classList.add('gravando');
+            }
+
+            pararVoz() {
+
+                const btn = document.getElementById(this.estadoVoz === 'pesquisa' ? 'micPesquisa' :
+                    this.estadoVoz === 'pesquisa-rapida' ? 'micPesquisaRapida' :
+                        this.estadoVoz === 'pergunta' ? 'micPergunta' : 'micResposta');
+                if (btn) btn.classList.remove('gravando');
+                this.estadoVoz = 'parado';
+            }
+
+            processarVoz(texto) {
+                switch (this.estadoVoz) {
+                    case 'pesquisa':
+                        this.abrirModalComTexto(texto);
+                        break;
+                    case 'pergunta':
+                        document.getElementById('entradaPergunta').value = texto;
+                        document.getElementById('entradaResposta').focus();
+                        break;
+                    case 'resposta':
+                        const textarea = document.getElementById('entradaResposta');
+                        textarea.value += (textarea.value ? '\n' : '') + texto;
+                        break;
+                    case 'pesquisa-rapida':
+                        document.getElementById('entradaPesquisa').value = texto;
+                        this.pesquisarConhecimento(); // Pesquisa automaticamente
+                        break;
+                }
+            }
+
+            abrirModalComTexto(texto) {
+                document.getElementById('tituloModal').textContent = 'Adicionar Conhecimento';
+                document.getElementById('formularioConhecimento').reset();
+                this.idEdicaoAtual = null;
+                document.getElementById('modal').style.display = 'block';
+                document.getElementById('entradaPergunta').value = texto;
+                setTimeout(() => document.getElementById('entradaResposta').focus(), 100);
+            }
+            //funções para sintese de fala
+            inicializarSinteseFala() {
+                if ('speechSynthesis' in window) {
+                    this.sinteseFala = window.speechSynthesis;
+                }
+            }
+            lerTexto(texto, botao) {
+                if (!this.sinteseFala) return;
+
+                if (this.lendoTexto) {
+                    this.pararLeitura(botao);
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(texto);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+
+                utterance.onstart = () => {
+                    this.lendoTexto = true;
+                    botao.innerHTML = '⏸️';
+                    botao.title = 'Parar leitura';
+                    botao.classList.add('lendo');
+                };
+
+                utterance.onend = () => {
+                    this.lendoTexto = false;
+                    botao.innerHTML = '🔊';
+                    botao.title = 'Ler texto';
+                    botao.classList.remove('lendo');
+                };
+
+                this.sinteseFala.speak(utterance);
+            }
+
+            pararLeitura(botao) {
+                if (this.sinteseFala) {
+                    this.sinteseFala.cancel();
+                    this.lendoTexto = false;
+                    botao.innerHTML = '🔊';
+                    botao.title = 'Ler texto';
+                    botao.classList.remove('lendo');
+                }
+            }
+
+            lerResposta(id) {
+                this.obterConhecimento(id).then(conhecimento => {
+                    if (conhecimento) {
+                        const botao = document.querySelector(`[data-ler="${id}"]`);
+                        this.lerTexto(conhecimento.resposta, botao);
+                    }
+                });
+            }
+            //remover pesquisa toda, porém individualmente
+            // Remove item específico da conversa
+            removerItemConversa(id) {
+                this.conversaPesquisas = this.conversaPesquisas.filter(item => item.id !== id);
+                this.atualizarConversaUI();
+            }
+            //remove cada parte das buscas encontradas individualmente
+            // Remove resultado específico de uma pesquisa
+            removerResultadoIndividual(conversaId, resultadoId) {
+                const conversa = this.conversaPesquisas.find(c => c.id === conversaId);
+                if (!conversa) return;
+
+                conversa.resultados = conversa.resultados.filter(r => r.id !== resultadoId);
+
+                // Se não sobrou nenhum resultado, remove a conversa toda
+                if (conversa.resultados.length === 0) {
+                    this.conversaPesquisas = this.conversaPesquisas.filter(c => c.id !== conversaId);
+                }
+
+                this.atualizarConversaUI();
+            }
+            //modal para expandir conteudos clicando no seu titulo
+            abrirModalFullscreen(consulta, resultados) {
+                const modal = document.getElementById('modalFullscreen');
+                const titulo = document.getElementById('modalFullscreenTitle');
+                const body = document.getElementById('modalFullscreenBody');
+
+                titulo.textContent = `Resultados para: "${consulta}"`;
+
+                body.innerHTML = resultados.map(resultado => `
+        <div class="modal-content-item">
+            <div class="modal-content-header">
+                <div class="modal-content-title">${resultado.pergunta}</div>
+                <div class="modal-content-actions">
+                    <button class="modal-btn modal-btn-read" onclick="gc.lerResposta(${resultado.id})">🔊</button>
+                    <button class="modal-btn modal-btn-copy" onclick="gc.copiarTexto(this)">📋</button>
+                    <button class="modal-btn modal-btn-edit" onclick="gc.editarConhecimento(${resultado.id})">✏️</button>
+                </div>
+            </div>
+            
+            ${resultado.linguagem ? `
+                <div class="modal-code-container">
+                    <div class="modal-code-header">
+                        <span class="modal-code-language">${resultado.linguagem.toUpperCase()}</span>
+                        <button class="modal-btn modal-btn-copy" onclick="gc.copiarCodigo(this)">📋</button>
+                    </div>
+                    <div class="modal-code-content">${this.escaparHtml(resultado.resposta)}</div>
+                </div>
+            ` : `
+                <div class="modal-text-content">${resultado.resposta.replace(/\n/g, '<br>')}</div>
+            `}
+        </div>
+    `).join('');
+
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+
+            fecharModalFullscreen() {
+                const modal = document.getElementById('modalFullscreen');
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            //abrir modal individual para cada resposta
+            async abrirModalFullscreenIndividual(id) {
+                const resultado = await this.obterConhecimento(id);
+                if (!resultado) return;
+
+                const modal = document.getElementById('modalFullscreen');
+                const titulo = document.getElementById('modalFullscreenTitle');
+                const body = document.getElementById('modalFullscreenBody');
+
+                titulo.textContent = resultado.pergunta;
+
+                body.innerHTML = `
+        <div class="modal-content-item">
+            <div class="modal-content-header">
+                <div class="modal-content-title">${resultado.pergunta}</div>
+                <div class="modal-content-actions">
+                    <button class="modal-btn modal-btn-read" onclick="gc.lerResposta(${resultado.id})">🔊 Ler</button>
+                    <button class="modal-btn modal-btn-copy" onclick="gc.copiarTextoModal(this)">📋 Copiar</button>
+                    <button class="modal-btn modal-btn-edit" onclick="gc.editarConhecimento(${resultado.id}); gc.fecharModalFullscreen()">✏️ Editar</button>
+                </div>
+            </div>
+            
+            ${resultado.linguagem ? `
+                <div class="modal-code-container">
+                    <div class="modal-code-header">
+                        <span class="modal-code-language">${resultado.linguagem.toUpperCase()}</span>
+                        <button class="modal-btn modal-btn-copy" onclick="gc.copiarTextoModal(this)">📋 Copiar</button>
+                    </div>
+                    <div class="modal-code-content">${this.escaparHtml(resultado.resposta)}</div>
+                </div>
+            ` : `
+                <div class="modal-text-content">${resultado.resposta.replace(/\n/g, '<br>')}</div>
+            `}
+            
+            ${resultado.etiquetas && resultado.etiquetas.length > 0 ? `
+                <div style="margin-top: 15px;">
+                    <strong>Etiquetas:</strong> ${resultado.etiquetas.map(tag => `<span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">${tag}</span>`).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+            //copiar expecifico para modal fullscreen
+            copiarTextoModal(botao) {
+                const item = botao.closest('.modal-content-item');
+                const codigo = item.querySelector('.modal-code-content');
+                const texto = item.querySelector('.modal-text-content');
+
+                const conteudo = codigo ? codigo.textContent : texto ? texto.textContent : '';
+
+                navigator.clipboard.writeText(conteudo).then(() => {
+                    botao.textContent = '✅ Copiado!';
+                    setTimeout(() => botao.innerHTML = '📋 Copiar', 2000);
+                });
+            }
+
+            //📁 2. SEÇÃO DE GERENCIAMENTO DE DADOS
+            // =============================================================================
+            // 💾 OPERAÇÕES DE BANCO DE DADOS (CRUD)
+            // =============================================================================
+            // Verifica se existe algum dado no banco
+            // 📥 Operações de Leitura
+            async temAlgumDado() {
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readonly');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.count();
+
+                    requisicao.onsuccess = () => resolver(requisicao.result > 0);
+                    requisicao.onerror = () => resolver(false);
+                });
+            }
+            // Obtém todos os conhecimentos do banco
+            async obterTodoConhecimento() {
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readonly');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.getAll();
+
+                    requisicao.onsuccess = () => resolver(requisicao.result);
+                });
+            }
+            // Obtém conhecimento específico por ID
+            async obterConhecimento(id) {
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readonly');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.get(id);
+
+                    requisicao.onsuccess = () => resolver(requisicao.result);
+                });
+            }
+            // ✏️ Operações de Escrita
+            // Adiciona novo conhecimento ao banco
+            async adicionarConhecimento(dados) {
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readwrite');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.add(dados);
+
+                    requisicao.onsuccess = () => resolver(requisicao.result);
+                });
+            }
+            // Atualiza conhecimento existente
+            async atualizarConhecimento(id, dados) {
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readwrite');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.put({ ...dados, id });
+
+                    requisicao.onsuccess = () => resolver();
+                });
+            }
+            // Exclui conhecimento do banco
+            async excluirConhecimento(id) {
+                if (!confirm('Tem certeza que deseja excluir este conhecimento?')) return;
+
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readwrite');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.delete(id);
+
+                    requisicao.onsuccess = () => {
+                        resolver();
+                        this.pesquisarGerenciamento();
+                    };
+                });
+            }
+            // Remove todos os registros do banco
+            async limparTudo() {
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readwrite');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.clear();
+
+                    requisicao.onsuccess = () => resolver();
+                });
+            }
+            // 🏗️ Dados Iniciais
+            // Carrega dados de exemplo no banco quando está vazio
+            async carregarDadosPadrao() {
+                const dadosPadrao = [
+                    {
+                        pergunta: "Como criar um site simples em HTML",
+                        resposta: `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Site</title>
+</head>
+<body>
+    <h1>Bem-vindo ao meu site!</h1>
+    <p>Este é um site simples criado com HTML.</p>
+</body>
+</html>`,
+                        linguagem: "html",
+                        etiquetas: ["html", "site", "básico", "web"]
+                    },
+                    {
+                        pergunta: "Como criar uma função simples em Python",
+                        resposta: `def saudacao(nome):
+    """Função que retorna uma saudação personalizada"""
+    return f"Olá, {nome}! Como você está?"
+
+# Exemplo de uso
+resultado = saudacao("Maria")
+print(resultado)`,
+                        linguagem: "python",
+                        etiquetas: ["python", "função", "básico"]
+                    },
+                    {
+                        pergunta: "Como conectar ao banco de dados em Java",
+                        resposta: `import java.sql.*;
+
+public class DatabaseConnection {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/mydb";
+        String username = "root";
+        String password = "password";
+        
+        try {
+            Connection connection = DriverManager.getConnection(url, username, password);
+            System.out.println("Conexão estabelecida com sucesso!");
+            connection.close();
+        } catch (SQLException e) {
+            System.out.println("Erro na conexão: " + e.getMessage());
+        }
+    }
+}`,
+                        linguagem: "java",
+                        etiquetas: ["java", "banco-dados", "mysql", "conexão"]
+                    }
+                ];
+
+                for (const item of dadosPadrao) {
+                    await this.adicionarConhecimento(item);
+                }
+            }
+            //📁 3. SEÇÃO DE PESQUISA E BUSCA
+
+            // =============================================================================
+            // 🔍 SISTEMA DE PESQUISA E BUSCA INTELIGENTE
+            // =============================================================================
+
+            // 🎯 Motor de Busca
+            // Busca conhecimentos que correspondem à consulta
+            async pesquisar(consulta) {
+                return new Promise((resolver) => {
+                    const transacao = this.bancoDados.transaction([this.nomeArmazenamento], 'readonly');
+                    const armazenamento = transacao.objectStore(this.nomeArmazenamento);
+                    const requisicao = armazenamento.getAll();
+
+                    requisicao.onsuccess = () => {
+                        const dados = requisicao.result;
+                        const consultaNormalizada = this.normalizarTexto(consulta);
+                        const tokensConsulta = consultaNormalizada.split(/\s+/).filter(token => token.length > 2);
+
+                        const resultados = dados.map(item => {
+                            let pontuacao = 0;
+                            const perguntaNormalizada = this.normalizarTexto(item.pergunta || '');
+                            const respostaNormalizada = this.normalizarTexto(item.resposta || '');
+                            const textoCompleto = perguntaNormalizada + ' ' + respostaNormalizada;
+
+                            // Verifica se a frase completa existe
+                            if (textoCompleto.includes(consultaNormalizada)) {
+                                pontuacao += 10;
+                            }
+
+                            // Pontuação para tokens consecutivos
+                            for (let i = 0; i < tokensConsulta.length - 1; i++) {
+                                const fraseConsecutiva = tokensConsulta.slice(i, i + 2).join(' ');
+                                if (textoCompleto.includes(fraseConsecutiva)) {
+                                    pontuacao += 5;
+                                }
+                            }
+
+                            // Pontuação para tokens individuais (só se não encontrou frases)
+                            if (pontuacao === 0) {
+                                const tokensEncontrados = tokensConsulta.filter(token =>
+                                    textoCompleto.includes(token)
+                                );
+
+                                // Só considera relevante se encontrou pelo menos 60% dos tokens
+                                const percentualEncontrado = tokensEncontrados.length / tokensConsulta.length;
+                                if (percentualEncontrado >= 0.6) {
+                                    pontuacao = tokensEncontrados.length;
+                                }
+                            }
+
+                            return { ...item, _pontuacao: pontuacao };
+                        });
+
+                        resolver(
+                            resultados
+                                .filter(resultado => resultado._pontuacao > 0)
+                                .sort((a, b) => b._pontuacao - a._pontuacao)
+                        );
+                    };
+                });
+            }
+            // Normaliza texto removendo acentos e convertendo para minúsculas
+            normalizarTexto(texto) {
+                return texto
+                    .normalize('NFD')                 // separa acentos
+                    .replace(/[\u0300-\u036f]/g, '')  // remove acentos
+                    .toLowerCase();                   // tudo minúsculo
+            }
+            // Gera etiquetas automaticamente baseadas no conteúdo
+            gerarEtiquetas(pergunta, resposta) {
+                const texto = (pergunta + ' ' + resposta).toLowerCase();
+                const palavras = texto.match(/\b\w{4,}\b/g); // Palavras com 4+ letras
+                const frequencia = {};
+
+                if (palavras) {
+                    palavras.forEach(palavra => {
+                        if (!['como', 'para', 'isso', 'este', 'with', 'from', 'that'].includes(palavra)) {
+                            frequencia[palavra] = (frequencia[palavra] || 0) + 1;
+                        }
+                    });
+                }
+
+                const ordenadas = Object.entries(frequencia)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5) // Limita a 5 etiquetas principais
+                    .map(([palavra]) => palavra);
+
+                return ordenadas;
+            }
+            // 🔍 Pesquisas da Interface
+            // Executa pesquisa baseada na entrada do usuário
+            async pesquisarConhecimento() {
+                const consulta = document.getElementById('entradaPesquisa').value.trim();
+                if (!consulta) return;
+
+                // // Adiciona ao histórico
+                // this.adicionarAoHistorico(consulta);
+
+                const resultados = await this.pesquisar(consulta);
+                this.adicionarNaConversa(consulta, resultados);
+
+                // Limpa o campo de pesquisa
+                document.getElementById('entradaPesquisa').value = '';
+            }
+            // Pesquisa conhecimentos na seção de gerenciamento
+            async pesquisarGerenciamento() {
+                const consulta = document.getElementById('entradaPesquisaGerenciar').value.trim();
+                const resultados = consulta ? await this.pesquisar(consulta) : await this.obterTodoConhecimento();
+                this.exibirResultadosGerenciamento(resultados);
+            }
+
+            //📁 4. SEÇÃO DE INTERFACE E VISUALIZAÇÃO
+
+            // =============================================================================
+            // 🎨 INTERFACE DO USUÁRIO E EXIBIÇÃO
+            // =============================================================================
+
+            // 📺 Exibição de Resultados
+            // Mostra mensagem de boas-vindas na tela inicial
+            exibirMensagemBoasVindas() {
+                const resultadosPesquisa = document.getElementById('resultadosPesquisa');
+                resultadosPesquisa.innerHTML = `
+                    <div class="card">
+                        <h3>🤖 Bem-vindo à sua IA de Conhecimentos!</h3>
+                        <p>Faça uma pergunta na barra de pesquisa acima ou use a aba "Gerenciar" para adicionar novos conhecimentos.</p>
+                        <p><strong>Exemplos de perguntas:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Como criar um site em HTML</li>
+                            <li>Função Python</li>
+                            <li>Conectar banco Java</li>
+                        </ul>
+                    </div>
+                `;
+            }
+            // Exibe resultados da pesquisa na interface
+            exibirResultadosPesquisa(resultados, consulta) {
+                const container = document.getElementById('resultadosPesquisa');
+
+                if (resultados.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-results">
+                            <div class="no-results-icon">🤔</div>
+                            <h3>Não encontrei nada sobre "${consulta}"</h3>
+                            <p>Que tal adicionar esse conhecimento?</p>
+                            <button class="btn btn-primary" onclick="abrirModalAdicionar('${consulta}')">Adicionar Conhecimento</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = resultados.map(item => `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">${this.destacar(item.pergunta, consulta)}</h3>
+                            <div class="card-actions">
+                                <button class="btn btn-read" data-ler="${item.id}" onclick="gc.lerResposta(${item.id})" title="Ler texto">🔊</button>
+                                <button class="btn btn-edit" onclick="gc.editarConhecimento(${item.id})">✏️ Editar</button>
+                            </div>
+                        </div>
+                        ${item.linguagem ? `
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span class="code-language">${item.linguagem.toUpperCase()}</span>
+                                    <button class="copy-btn" onclick="gc.copiarCodigo(this)">📋 Copiar</button>
+                                </div>
+                                <div class="code-content">${this.destacar(this.escaparHtml(item.resposta), consulta)}</div>
+                            </div>
+                        ` : `
+                            <div style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin: 10px 0;">
+                                ${item.resposta.replace(/\n/g, '<br>')}
+                            </div>
+                        `}
+                    </div>
+                `).join('');
+            }
+            // Exibe resultados na seção de gerenciamento
+            exibirResultadosGerenciamento(resultados) {
+                const container = document.getElementById('resultadosGerenciamento');
+                const consulta = document.getElementById('entradaPesquisaGerenciar').value.trim();
+
+                if (resultados.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-results">
+                            <div class="no-results-icon">📝</div>
+                            <h3>Nenhum conhecimento encontrado</h3>
+                            <p>Comece adicionando alguns conhecimentos!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = resultados.map(item => `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">${this.destacar(item.pergunta, consulta)}</h3>
+                            <div class="card-actions">
+                                <button class="btn btn-read" data-ler="${item.id}" onclick="gc.lerResposta(${item.id})" title="Ler texto">🔊</button>
+                                <button class="btn btn-edit" onclick="gc.editarConhecimento(${item.id})">✏️</button>
+                                <button class="btn btn-delete" onclick="gc.excluirConhecimento(${item.id})">🗑️</button>
+                            </div>
+                        </div>
+                        <p style="color: #666; font-size: 14px;">
+                            ${item.linguagem || 'Texto'} • ${item.resposta.length} caracteres
+                        </p>
+                    </div>
+                `).join('');
+            }
+            // 🎯 Formatação e Destaque
+            // Destaca termos da pesquisa no texto
+            destacar(texto, consulta) {
+                const consultaNormalizada = this.normalizarTexto(consulta);
+                const palavras = consultaNormalizada.split(/\s+/).filter(palavra => palavra.length > 2);
+                let resultado = texto;
+
+                for (const palavra of palavras) {
+                    const regex = new RegExp(palavra.normalize('NFD').replace(/[\u0300-\u036f]/g, ''), 'gi');
+                    resultado = resultado.replace(regex, (correspondencia) => `<mark>${correspondencia}</mark>`);
+                }
+
+                return resultado;
+            }
+            // Escapa caracteres especiais HTML para exibição segura
+            escaparHtml(texto) {
+                const div = document.createElement('div');
+                div.textContent = texto;
+                return div.innerHTML;
+            }
+
+            //📁 5. SEÇÃO DE CONVERSA E HISTÓRICO
+
+            // =============================================================================
+            // 💬 SISTEMA DE CONVERSA INTERATIVA
+            // =============================================================================
+
+            // 📝 Gerenciamento da Conversa
+            // Adiciona pesquisa na conversa
+            adicionarNaConversa(consulta, resultados) {
+                const itemConversa = {
+                    id: Date.now(),
+                    consulta,
+                    resultados,
+                    timestamp: new Date().toLocaleTimeString('pt-BR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                };
+
+                this.conversaPesquisas.push(itemConversa);
+                this.atualizarConversaUI();
+            }
+            // Atualiza interface da conversa
+            atualizarConversaUI() {
+                const container = document.getElementById('resultadosPesquisa');
+
+                if (this.conversaPesquisas.length === 0) {
+                    this.exibirMensagemBoasVindas();
+                    return;
+                }
+
+                container.innerHTML = `
+        <div class="conversa-container">
+            <div class="conversa-header">
+                <span>💬 Conversa</span>
+                <button class="btn-mini" onclick="gc.limparConversa()" title="Limpar conversa">🗑️</button>
+            </div>
+            <div class="conversa-scroll">
+                ${this.conversaPesquisas.map(item => this.renderizarItemConversa(item)).join('')}
+            </div>
+        </div>
+    `;
+
+                // Scroll para o final
+                setTimeout(() => {
+                    const scroll = container.querySelector('.conversa-scroll');
+                    if (scroll) scroll.scrollTop = scroll.scrollHeight;
+                }, 100);
+            }
+            // Renderiza cada item da conversa
+            renderizarItemConversa(item) {
+                return `
+        <div class="conversa-item" data-consulta="${item.consulta}">
+            <div class="pergunta-usuario">
+                <div class="pergunta-header">
+                    <span class="pergunta-icon"><button class="btn-mini" onclick="gc.removerItemConversa(${item.id})" title="Remover">❌</button> 👤</span>
+                    <span class="pergunta-texto" onclick="gc.abrirModalFullscreen('${item.consulta}', ${JSON.stringify(item.resultados).replace(/"/g, '&quot;')})" style="cursor: pointer; text-decoration: underline;">${item.consulta}</span>
+                    <span class="pergunta-hora">${item.timestamp}</span>
+                </div>
+            </div>
+            
+            <div class="resposta-ia">
+                <div class="resposta-header">
+                    <span class="resposta-icon">🤖</span>
+                    <span class="resposta-info">${item.resultados.length} resultado${item.resultados.length !== 1 ? 's' : ''} encontrado${item.resultados.length !== 1 ? 's' : ''}</span>
+                </div>
+                
+                <div class="resposta-conteudo">
+                    ${item.resultados.length === 0 ? `
+                        <div class="sem-resultados">
+                            <p>Não encontrei informações sobre "${item.consulta}"</p>
+                            <button class="btn-modern" onclick="abrirModalAdicionar('${item.consulta}')">➕ Adicionar</button>
+                        </div>
+                    ` : `
+                        ${item.resultados.slice(0, 3).map(resultado => `
+                            <div class="resultado-conversa">
+                                <div class="resultado-conversa-header">
+                                    <span class="resultado-titulo" onclick="gc.abrirModalFullscreenIndividual(${resultado.id})" style="cursor: pointer; text-decoration: underline;">${this.destacar(resultado.pergunta, item.consulta)}</span>
+                                    <button class="btn-mini" data-ler="${resultado.id}" onclick="gc.lerResposta(${resultado.id})" title="Ler">🔊</button>
+                                    <button class="btn-mini" onclick="gc.copiarTexto(this)" title="Copiar">📋</button>
+                                    <button class="btn-mini" onclick="gc.editarConhecimento(${resultado.id})" title="Editar">✏️</button>
+                                    <button class="btn-mini" onclick="gc.removerResultadoIndividual(${item.id}, ${resultado.id})" title="Remover este resultado">❌</button>
+                                </div>
+                                
+                                ${resultado.linguagem ? `
+                                    <div class="code-conversa">
+                                        <div class="code-header-conversa">
+                                            <span>${resultado.linguagem.toUpperCase()}</span>
+                                            <button class="btn-mini" onclick="gc.copiarCodigo(this)" title="Copiar">📋</button>
+                                        </div>
+                                        <div class="code-content">${this.destacar(this.escaparHtml(resultado.resposta), item.consulta)}</div>
+                                    </div>
+                                ` : `
+                                <div class="text-conversa">
+                                    <div class="text-content">${resultado.resposta.length > 200 ?
+                        resultado.resposta.substring(0, 200) + '...' :
+                        resultado.resposta
+                    }</div>
+                                </div>
+                                `}
+                            </div>
+                        `).join('')}
+                        
+                        ${item.resultados.length > 3 ? `
+                            <div class="mais-resultados">
+                                <button class="btn-modern" onclick="gc.mostrarTodosResultados('${item.consulta}')">
+                                    Ver todos os ${item.resultados.length} resultados
+                                </button>
+                            </div>
+                        ` : ''}
+                    `}
+                </div>
+            </div>
+        </div>
+    `;
+            }
+            // Limpa a conversa
+            limparConversa() {
+                if (!confirm('Limpar toda a conversa?')) return;
+
+                this.conversaPesquisas = [];
+                this.exibirMensagemBoasVindas();
+            }
+            // Mostra todos os resultados de uma pesquisa
+            mostrarTodosResultados(consulta) {
+                const item = this.conversaPesquisas.find(i => i.consulta === consulta);
+                if (!item) return;
+
+                const container = document.querySelector(`[data-consulta="${consulta}"] .resposta-conteudo`);
+                if (!container) return;
+
+                // Remove o botão "ver todos"
+                const maisResultados = container.querySelector('.mais-resultados');
+                if (maisResultados) maisResultados.remove();
+
+                // Renderiza os resultados restantes
+                const restantes = item.resultados.slice(3);
+                restantes.forEach(resultado => {
+                    const html = `
+                    <div class="resultado-conversa">
+                        <div class="resultado-conversa-header">
+                            <span class="resultado-titulo" onclick="gc.abrirModalFullscreenIndividual(${resultado.id})" style="cursor: pointer; text-decoration: underline;">${this.destacar(resultado.pergunta, item.consulta)}</span><button class="btn-mini" data-ler="${resultado.id}" onclick="gc.lerResposta(${resultado.id})" title="Ler">🔊</button>
+                            <button class="btn-mini" onclick="gc.copiarTexto(this)" title="Copiar">📋</button>
+                            <button class="btn-mini" onclick="gc.editarConhecimento(${resultado.id})" title="Editar">✏️</button>
+                            <button class="btn-mini" onclick="gc.removerResultadoIndividual(${item.id}, ${resultado.id})" title="Remover este resultado">❌</button>
+                        </div>
+
+                ${resultado.linguagem ? `
+                    <div class="code-conversa">
+                        <div class="code-header-conversa">
+                            <span>${resultado.linguagem.toUpperCase()}</span>
+                            <button class="btn-mini" onclick="gc.copiarCodigo(this)" title="Copiar">📋</button>
+                        </div>
+                        <div class="code-content">${this.destacar(this.escaparHtml(resultado.resposta), item.consulta)}</div>
+                    </div>
+                ` : `
+                    <div class="text-conversa">
+                        ${resultado.resposta}
+                    </div>
+                `}
+            </div>
+            </div>
+        `;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            }
+
+            //📁 6. SEÇÃO DE FORMULÁRIOS E MODAIS
+
+            // =============================================================================
+            // 📝 FORMULÁRIOS E JANELAS MODAIS
+            // =============================================================================
+
+            // 🔧 Gerenciamento de Formulários
+            // Salva conhecimento (novo ou editado)
+            async salvarConhecimento() {
+                const pergunta = document.getElementById('entradaPergunta').value.trim();
+                const linguagem = document.getElementById('selecionarLinguagem').value;
+                const resposta = document.getElementById('entradaResposta').value.trim();
+
+                if (!pergunta || !resposta) return;
+
+                const dados = {
+                    pergunta,
+                    resposta,
+                    linguagem: linguagem || null,
+                    etiquetas: this.gerarEtiquetas(pergunta, resposta),
+                    carimboTempo: new Date().toISOString()
+                };
+
+                if (this.idEdicaoAtual) {
+                    await this.atualizarConhecimento(this.idEdicaoAtual, dados);
+                    this.idEdicaoAtual = null;
+                } else {
+                    await this.adicionarConhecimento(dados);
+                }
+
+                this.fecharModal();
+                this.pesquisarGerenciamento();
+            }
+            // Abre modal para editar conhecimento existente
+            async editarConhecimento(id) {
+                const conhecimento = await this.obterConhecimento(id);
+                if (!conhecimento) return;
+
+                this.idEdicaoAtual = id;
+                document.getElementById('tituloModal').textContent = 'Editar Conhecimento';
+                document.getElementById('entradaPergunta').value = conhecimento.pergunta;
+                document.getElementById('selecionarLinguagem').value = conhecimento.linguagem || '';
+                document.getElementById('entradaResposta').value = conhecimento.resposta;
+
+                document.getElementById('modal').style.display = 'block';
+            }
+            // Fecha modal e limpa formulário
+            fecharModal() {
+                document.getElementById('modal').style.display = 'none';
+                document.getElementById('formularioConhecimento').reset();
+                this.idEdicaoAtual = null;
+            }
+            //📁 7. SEÇÃO DE IMPORTAÇÃO/EXPORTAÇÃO
+            // =============================================================================
+            // 📤📥 BACKUP E RESTAURAÇÃO DE DADOS
+            // =============================================================================
+            // Exporta todos os dados para arquivo JSON
+            async exportarDados() {
+                const dados = await this.obterTodoConhecimento();
+                const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const elemento = document.createElement('a');
+                elemento.href = url;
+                elemento.download = `backup-conhecimento-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(elemento);
+                elemento.click();
+                document.body.removeChild(elemento);
+                URL.revokeObjectURL(url);
+            }
+            // Importa dados de arquivo JSON
+            async importarDados(evento) {
+                const arquivo = evento.target.files[0];
+                if (!arquivo) return;
+
+                try {
+                    const texto = await arquivo.text();
+                    const dados = JSON.parse(texto);
+
+                    if (!Array.isArray(dados)) {
+                        alert('Arquivo inválido! O arquivo deve conter um array de conhecimentos.');
+                        return;
+                    }
+
+                    // Limpar dados existentes
+                    await this.limparTudo();
+
+                    // Importar novos dados
+                    for (const item of dados) {
+                        // Remove ID para evitar conflitos
+                        const { id, ...dadosItem } = item;
+                        await this.adicionarConhecimento(dadosItem);
+                    }
+
+                    alert(`${dados.length} conhecimentos importados com sucesso!`);
+                    this.pesquisarGerenciamento();
+                } catch (erro) {
+                    alert('Erro ao importar arquivo: ' + erro.message);
+                }
+
+                // Reset da entrada
+                evento.target.value = '';
+            }
+            // Limpa todos os dados com confirmação dupla
+            async limparTodosDados() {
+                if (!confirm('ATENÇÃO: Isso apagará TODOS os conhecimentos permanentemente. Tem certeza?')) return;
+                if (!confirm('Última confirmação: Todos os dados serão perdidos!')) return;
+
+                await this.limparTudo();
+                alert('Todos os dados foram apagados!');
+                this.pesquisarGerenciamento();
+                this.exibirMensagemBoasVindas();
+            }
+            //📁 8. SEÇÃO DE UTILIDADES
+            // =============================================================================
+            // 🛠️ FUNÇÕES UTILITÁRIAS
+            // =============================================================================
+            // Copia código para a área de transferência
+            copiarCodigo(botao) {
+                const conteudoCodigo = botao.closest('.code-conversa').querySelector('.code-content');
+                navigator.clipboard.writeText(conteudoCodigo.textContent);
+
+                const textoOriginal = botao.textContent;
+                botao.textContent = '✅ Copiado!';
+                setTimeout(() => {
+                    botao.textContent = textoOriginal;
+                }, 2000);
+            }
+            // Copia texto simples
+            copiarTexto(botao) {
+                // Encontra o container do resultado
+                const resultadoContainer = botao.closest('.resultado-conversa');
+
+                // Busca o conteúdo do texto
+                const textContent = resultadoContainer.querySelector('.text-content') ||
+                    resultadoContainer.querySelector('.code-content');
+
+                if (textContent) {
+                    navigator.clipboard.writeText(textContent.textContent);
+
+                    const textoOriginal = botao.textContent;
+                    botao.textContent = '✅';
+                    setTimeout(() => botao.textContent = textoOriginal, 1000);
+                }
+            }
+
+        }
+        //📁 9. SEÇÃO DE FUNÇÕES GLOBAIS
+        // =============================================================================
+        // 🌐 FUNÇÕES GLOBAIS DE INTERFACE
+        // =============================================================================
+
+        // 🔄 Navegação
+        // Troca entre abas da interface
+        function trocarAba(aba) {
+            // Atualiza botões das abas
+            document.querySelectorAll('.nav-tab').forEach(botao => botao.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Atualiza seções de conteúdo
+            document.querySelectorAll('.content-section').forEach(secao => secao.classList.remove('active'));
+            document.getElementById(aba + '-section').classList.add('active');
+
+            // Alterna visibilidade das barras de pesquisa
+            const pesquisaSearch = document.getElementById('pesquisaSearch');
+            const pesquisaManage = document.getElementById('pesquisaManage');
+
+            if (aba === 'search') {
+                if (pesquisaSearch) pesquisaSearch.style.display = 'flex';
+                if (pesquisaManage) pesquisaManage.style.display = 'none';
+            } else if (aba === 'manage') {
+                if (pesquisaSearch) pesquisaSearch.style.display = 'none';
+                if (pesquisaManage) pesquisaManage.style.display = 'flex';
+
+                // Carrega dados de gerenciamento ao trocar para aba gerenciar
+                gc.pesquisarGerenciamento();
+            }
+        }
+        // 🔍 Pesquisas Globais
+        // Executa pesquisa de conhecimento
+        function pesquisarConhecimento() {
+            gc.pesquisarConhecimento();
+        }
+        // Executa pesquisa no gerenciamento
+        function pesquisarGerenciamento() {
+            gc.pesquisarGerenciamento();
+        }
+        // 📝 Modais Globais
+        // Abre modal para adicionar conhecimento
+        function abrirModal(tipo) {
+            document.getElementById('tituloModal').textContent = 'Adicionar Conhecimento';
+            document.getElementById('formularioConhecimento').reset();
+            gc.idEdicaoAtual = null;
+            document.getElementById('modal').style.display = 'block';
+        }
+        // Abre modal com pergunta pré-preenchida
+        function abrirModalAdicionar(consulta = '') {
+            abrirModal('add');
+            if (consulta) {
+                document.getElementById('entradaPergunta').value = consulta;
+            }
+        }
+        // Fecha modal
+        function fecharModal() {
+            gc.fecharModal();
+        }
+        // 💾 Dados Globais
+        // Exporta dados
+        function exportarDados() {
+            gc.exportarDados();
+        }
+
+        // Importa dados
+        function importarDados(evento) {
+            gc.importarDados(evento);
+        }
+
+        // Limpa todos os dados
+        function limparTodosDados() {
+            gc.limparTodosDados();
+        }
+        //📁 10. SEÇÃO DE INICIALIZAÇÃO E EVENTOS
+        // =============================================================================
+        // ⚡ INICIALIZAÇÃO E CONFIGURAÇÃO DE EVENTOS GLOBAIS
+        // =============================================================================
+
+        // 🎯 Variável Global
+        // Funções globais para interação com a interface
+        let gc; // Instância global do GerenciadorConhecimento
+        // 🚀 Inicialização
+        // Inicializa aplicação quando DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', () => {
+            gc = new GerenciadorConhecimento();
+        });
+        // ⌨️ Eventos Globais
+        // Fecha modal ao clicar fora dele
+        document.addEventListener('click', (evento) => {
+            const modal = document.getElementById('modal');
+            if (evento.target === modal) {
+                fecharModal();
+            }
+        });
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModal();
+            }
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('entradaPesquisa').focus();
+            }
+        });
+    </script>
+</body>
+
+</html>
