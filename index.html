@@ -31,7 +31,7 @@
 
         .container {
             max-width: 100%;
-            margin: 120px auto 0 auto;
+
             /* Espaço para navbar fixa */
             padding: 5px 15px;
             background: rgba(255, 255, 255, 0.95);
@@ -130,20 +130,20 @@
         ======================================== */
 
         /* Container da barra de pesquisa */
-        .search-container {
+        /* .search-container {
             position: relative;
             margin-bottom: 0px;
-        }
+        } */
 
         /* Barra de pesquisa moderna */
-        .search-bar-modern {
+        /* .search-bar-modern {
             position: relative;
             width: 100%;
             max-width: 600px;
             margin: 0 auto 20px auto;
             display: flex;
             gap: 10px;
-        }
+        } */
 
         /* Input de pesquisa */
         .search-input,
@@ -497,6 +497,7 @@
         }
 
         .resposta-conteudo {
+            margin-bottom: 60px;
             padding: 1px;
         }
 
@@ -708,7 +709,7 @@
         .btn-mic {
             background: #4CAF50;
             border: none;
-            border-radius: 50%;
+            border-radius: 30%;
             width: 50px;
             height: 50px;
             cursor: pointer;
@@ -751,13 +752,12 @@
         .btn-micvr {
             background: #4879e5;
             border: none;
-            border-radius: 40%;
-            width: 100px;
-            height: 100px;
+            border-radius: 30%;
+            width: 50px;
+            height: 50px;
             cursor: pointer;
-            font-size: 75px;
-            margin-left: 40%;
-            margin-bottom: 1%;
+            font-size: 40px;
+            margin-right: 8px;
         }
 
         .btn-micvr-small {
@@ -850,7 +850,7 @@
         .modal-fullscreen-header {
             background: #2c3e50;
             color: white;
-            padding: 15px 20px;
+            padding: 15px 10px;
             display: flex;
             justify-content: between;
             align-items: center;
@@ -866,13 +866,14 @@
         }
 
         .modal-fullscreen-close {
+            margin-right: 10px;
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 8px 11px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
         }
 
@@ -882,7 +883,7 @@
 
         .modal-fullscreen-body {
             flex: 1;
-            padding: 20px;
+            padding: 5px;
             overflow-y: auto;
             background: #f8f9fa;
         }
@@ -890,7 +891,7 @@
         .modal-content-item {
             background: white;
             border-radius: 8px;
-            padding: 20px;
+            padding: 5px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -911,6 +912,7 @@
         }
 
         .modal-content-actions {
+            margin-top: 13px;
             display: flex;
             gap: 10px;
         }
@@ -996,6 +998,79 @@
             background: #555;
         }
 
+        /* navbar fixa inferior */
+        .navbarI {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .center-buttons {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-center {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Estilo geral da barra de pesquisa */
+        .search-container {
+            position: fixed;
+            bottom: 80px;
+            width: 98.5%;
+            padding: 7px;
+            background: #f9f9f9;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+
+            z-index: 1000;
+        }
+
+        .search-container input {
+            width: 85%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .search-container button {
+            padding: 0;
+            font-size: 16px;
+            margin-left: 6px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .search-bar-modern {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+
         /* ========================================
    RESPONSIVIDADE
    ======================================== */
@@ -1030,8 +1105,9 @@
             }
 
             .container {
+
                 padding: 0 10px;
-                margin-top: 70px;
+                margin-top: 0px;
             }
 
             .modal-content {
@@ -1041,7 +1117,8 @@
 
             .resultados-gerenciador {
                 max-height: 53vh;
-                margin-top: 50px;
+                margin-top: 20px;
+                margin-bottom: 20px;
             }
         }
 
@@ -1058,38 +1135,35 @@
     <!-- ========================================
          BARRA DE NAVEGAÇÃO PRINCIPAL
     ======================================== -->
-    <nav class="navbar">
 
-        <!-- Abas de navegação (Perguntas e Gerenciar) -->
-        <div class="nav-tabs">
-            <button class="nav-tab active" onclick="trocarAba('search')">
-                🔍 Perguntas
-            </button>
+    <!-- Barra de pesquisa da aba "Perguntas" -->
+    <div id="pesquisaSearch" class="search-container">
+        <input type="text" id="entradaPesquisa" class="search-input"
+            placeholder="Faça uma pergunta... (ex: como criar site em HTML)">
+        <button class="search-btn" onclick="pesquisarConhecimento()">🔍</button>
+    </div>
+
+    <!-- Barra de pesquisa da aba "Gerenciar" -->
+    <div id="pesquisaManage" class="search-container" style="display: none;">
+        <div class="search-bar-modern">
+            <input id="entradaPesquisaGerenciar" type="text" placeholder="🔍 Buscar conhecimento...">
+            <button id="botaoLimparPesquisa" title="Limpar busca" style="display: none;">✖</button>
+        </div>
+    </div>
+
+    <!-- Navbar inferior fixa -->
+    <nav class="navbarI">
+        <!-- Botão à esquerda -->
+        <button class="nav-tab active" onclick="trocarAba('search')">🔍 Perguntas</button>
+
+        <!-- Botões centrais -->
+        <div class="center-buttons">
             <button id="micPesquisa" class="btn-mic" title="Falar pergunta">🎤</button>
-            <button class="nav-tab" onclick="trocarAba('manage')">
-                ⚙️ Gerenciar
-            </button>
+            <button id="micPesquisaRapida" class="btn-micvr" title="Pesquisa rápida por voz">🎤</button>
         </div>
 
-        <!-- Barra de pesquisa da aba "Perguntas" -->
-        <div id="pesquisaSearch" class="search-container">
-            <input type="text" id="entradaPesquisa" class="search-input"
-                placeholder="Faça uma pergunta... (ex: como criar site em HTML)">
-            <button class="search-btn" onclick="pesquisarConhecimento()">
-                🔍
-            </button>
-        </div>
-
-        <!-- Barra de pesquisa da aba "Gerenciar" (inicialmente oculta) -->
-        <div id="pesquisaManage" class="search-container" style="display: none;">
-            <div class="search-bar-modern">
-                <input id="entradaPesquisaGerenciar" type="text" placeholder="🔍 Buscar conhecimento...">
-                <button id="botaoLimparPesquisa" title="Limpar busca" style="display: none;">
-                    ✖
-                </button>
-            </div>
-        </div>
-
+        <!-- Botão à direita -->
+        <button class="nav-tab" onclick="trocarAba('manage')">⚙️ Gerenciar</button>
     </nav>
 
     <!-- ========================================
@@ -1107,7 +1181,6 @@
                     <!-- Os resultados da pesquisa aparecerão aqui via JavaScript -->
                 </div>
             </div>
-            <button id="micPesquisaRapida" class="btn-micvr" title="Pesquisa rápida por voz">🎤</button>
         </div>
 
 
@@ -1223,11 +1296,12 @@
     ======================================== -->
     <div id="modalFullscreen" class="modal-fullscreen">
         <div class="modal-fullscreen-content">
-            <div class="modal-fullscreen-header">
-                <div class="modal-fullscreen-title" id="modalFullscreenTitle"></div>
-                <button class="modal-fullscreen-close" onclick="gc.fecharModalFullscreen()">✕ Fechar</button>
-            </div>
             <div class="modal-fullscreen-body" id="modalFullscreenBody"></div>
+            <div class="modal-fullscreen-header">
+                <button class="modal-fullscreen-close" onclick="gc.fecharModalFullscreen()">✕ Fechar</button>
+                <div class="modal-fullscreen-title" id="modalFullscreenTitle"></div>
+            </div>
+
         </div>
     </div>
 
@@ -1248,7 +1322,7 @@
         // Classe principal para gerenciar o banco de dados de conhecimento e interface do usuário
         class GerenciadorConhecimento {
             constructor() {
-                this.nomeBancoDados = 'BancoDadosConhecimento';
+                this.nomeBancoDados = 'IaConhecimentos';
                 this.nomeArmazenamento = 'conhecimento';
                 this.bancoDados = null;
                 this.idEdicaoAtual = null;
@@ -1552,11 +1626,7 @@
         <div class="modal-content-item">
             <div class="modal-content-header">
                 <div class="modal-content-title">${resultado.pergunta}</div>
-                <div class="modal-content-actions">
-                    <button class="modal-btn modal-btn-read" onclick="gc.lerResposta(${resultado.id})">🔊 Ler</button>
-                    <button class="modal-btn modal-btn-copy" onclick="gc.copiarTextoModal(this)">📋 Copiar</button>
-                    <button class="modal-btn modal-btn-edit" onclick="gc.editarConhecimento(${resultado.id}); gc.fecharModalFullscreen()">✏️ Editar</button>
-                </div>
+                
             </div>
             
             ${resultado.linguagem ? `
@@ -1574,6 +1644,11 @@
             ${resultado.etiquetas && resultado.etiquetas.length > 0 ? `
                 <div style="margin-top: 15px;">
                     <strong>Etiquetas:</strong> ${resultado.etiquetas.map(tag => `<span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">${tag}</span>`).join('')}
+                </div>
+                <div class="modal-content-actions">
+                    <button class="modal-btn modal-btn-read" onclick="gc.lerResposta(${resultado.id})">🔊 Ler</button>
+                    <button class="modal-btn modal-btn-copy" onclick="gc.copiarTextoModal(this)">📋 Copiar</button>
+                    <button class="modal-btn modal-btn-edit" onclick="gc.editarConhecimento(${resultado.id}); gc.fecharModalFullscreen()">✏️ Editar</button>
                 </div>
             ` : ''}
         </div>
@@ -1916,36 +1991,37 @@ public class DatabaseConnection {
                 `).join('');
             }
             // Exibe resultados na seção de gerenciamento
+            // Exibe resultados na seção de gerenciamento
             exibirResultadosGerenciamento(resultados) {
                 const container = document.getElementById('resultadosGerenciamento');
                 const consulta = document.getElementById('entradaPesquisaGerenciar').value.trim();
 
                 if (resultados.length === 0) {
                     container.innerHTML = `
-                        <div class="no-results">
-                            <div class="no-results-icon">📝</div>
-                            <h3>Nenhum conhecimento encontrado</h3>
-                            <p>Comece adicionando alguns conhecimentos!</p>
-                        </div>
-                    `;
+            <div class="no-results">
+                <div class="no-results-icon">📝</div>
+                <h3>Nenhum conhecimento encontrado</h3>
+                <p>Comece adicionando alguns conhecimentos!</p>
+            </div>
+        `;
                     return;
                 }
 
                 container.innerHTML = resultados.map(item => `
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">${this.destacar(item.pergunta, consulta)}</h3>
-                            <div class="card-actions">
-                                <button class="btn btn-read" data-ler="${item.id}" onclick="gc.lerResposta(${item.id})" title="Ler texto">🔊</button>
-                                <button class="btn btn-edit" onclick="gc.editarConhecimento(${item.id})">✏️</button>
-                                <button class="btn btn-delete" onclick="gc.excluirConhecimento(${item.id})">🗑️</button>
-                            </div>
-                        </div>
-                        <p style="color: #666; font-size: 14px;">
-                            ${item.linguagem || 'Texto'} • ${item.resposta.length} caracteres
-                        </p>
-                    </div>
-                `).join('');
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title" onclick="gc.abrirModalFullscreenIndividual(${item.id})" style="cursor: pointer; text-decoration: underline;" title="Clique para visualizar em tela cheia">${this.destacar(item.pergunta, consulta)}</h3>
+                <div class="card-actions">
+                    <button class="btn btn-read" data-ler="${item.id}" onclick="gc.lerResposta(${item.id})" title="Ler texto">🔊</button>
+                    <button class="btn btn-edit" onclick="gc.editarConhecimento(${item.id})" title="Editar">✏️</button>
+                    <button class="btn btn-delete" onclick="gc.excluirConhecimento(${item.id})" title="Excluir">🗑️</button>
+                </div>
+            </div>
+            <p style="color: #666; font-size: 14px;">
+                ${item.linguagem || 'Texto'} • ${item.resposta.length} caracteres
+            </p>
+        </div>
+    `).join('');
             }
             // 🎯 Formatação e Destaque
             // Destaca termos da pesquisa no texto
@@ -2023,7 +2099,7 @@ public class DatabaseConnection {
         <div class="conversa-item" data-consulta="${item.consulta}">
             <div class="pergunta-usuario">
                 <div class="pergunta-header">
-                    <span class="pergunta-icon"><button class="btn-mini" onclick="gc.removerItemConversa(${item.id})" title="Remover">❌</button> 👤</span>
+                    <span class="pergunta-icon"><button class="btn-mini" onclick="gc.removerItemConversa(${item.id})" title="Remover">🗑️</button> 👤</span>
                     <span class="pergunta-texto" onclick="gc.abrirModalFullscreen('${item.consulta}', ${JSON.stringify(item.resultados).replace(/"/g, '&quot;')})" style="cursor: pointer; text-decoration: underline;">${item.consulta}</span>
                     <span class="pergunta-hora">${item.timestamp}</span>
                 </div>
@@ -2049,7 +2125,7 @@ public class DatabaseConnection {
                                     <button class="btn-mini" data-ler="${resultado.id}" onclick="gc.lerResposta(${resultado.id})" title="Ler">🔊</button>
                                     <button class="btn-mini" onclick="gc.copiarTexto(this)" title="Copiar">📋</button>
                                     <button class="btn-mini" onclick="gc.editarConhecimento(${resultado.id})" title="Editar">✏️</button>
-                                    <button class="btn-mini" onclick="gc.removerResultadoIndividual(${item.id}, ${resultado.id})" title="Remover este resultado">❌</button>
+                                    <button class="btn-mini" onclick="gc.removerResultadoIndividual(${item.id}, ${resultado.id})" title="Remover este resultado">🗑️</button>
                                 </div>
                                 
                                 ${resultado.linguagem ? `
@@ -2112,7 +2188,7 @@ public class DatabaseConnection {
                             <span class="resultado-titulo" onclick="gc.abrirModalFullscreenIndividual(${resultado.id})" style="cursor: pointer; text-decoration: underline;">${this.destacar(resultado.pergunta, item.consulta)}</span><button class="btn-mini" data-ler="${resultado.id}" onclick="gc.lerResposta(${resultado.id})" title="Ler">🔊</button>
                             <button class="btn-mini" onclick="gc.copiarTexto(this)" title="Copiar">📋</button>
                             <button class="btn-mini" onclick="gc.editarConhecimento(${resultado.id})" title="Editar">✏️</button>
-                            <button class="btn-mini" onclick="gc.removerResultadoIndividual(${item.id}, ${resultado.id})" title="Remover este resultado">❌</button>
+                            <button class="btn-mini" onclick="gc.removerResultadoIndividual(${item.id}, ${resultado.id})" title="Remover este resultado">🗑️</button>
                         </div>
 
                 ${resultado.linguagem ? `
