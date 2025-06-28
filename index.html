@@ -37,7 +37,7 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px 20px 0 0;
-            min-height: calc(100vh - 120px);
+            min-height: calc(100vh - 134px);
         }
 
         /* ========================================
@@ -125,26 +125,6 @@
             }
         }
 
-        /* ========================================
-        BARRA DE PESQUISA
-        ======================================== */
-
-        /* Container da barra de pesquisa */
-        /* .search-container {
-            position: relative;
-            margin-bottom: 0px;
-        } */
-
-        /* Barra de pesquisa moderna */
-        /* .search-bar-modern {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto 20px auto;
-            display: flex;
-            gap: 10px;
-        } */
-
         /* Input de pesquisa */
         .search-input,
         .search-bar-modern input {
@@ -169,6 +149,7 @@
         .search-bar-modern button {
             position: absolute;
             right: 10px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             background: linear-gradient(45deg, #667eea, #764ba2);
@@ -1037,7 +1018,7 @@
         .search-container {
             position: fixed;
             bottom: 80px;
-            width: 98.5%;
+            width: 100%;
             padding: 7px;
             background: #f9f9f9;
             border-top: 1px solid #ccc;
@@ -1047,17 +1028,17 @@
         }
 
         .search-container input {
-            width: 85%;
-            padding: 10px;
-            font-size: 16px;
+            width: 100%;
+            padding: 10px 8px 4px 48px;
+            font-size: 20px;
             border: 1px solid #ccc;
             border-radius: 6px;
         }
 
         .search-container button {
             padding: 0;
-            font-size: 16px;
-            margin-left: 6px;
+            font-size: 19px;
+            margin: 0px 0px 0px 0px;
             border: none;
             background-color: #007bff;
             color: white;
@@ -1139,10 +1120,11 @@
 
     <!-- Barra de pesquisa da aba "Perguntas" -->
     <div id="pesquisaSearch" class="search-container">
+        <button class="search-btn" onclick="pesquisarConhecimento()">🔍</button>
         <input type="text" id="entradaPesquisa" class="search-input"
             placeholder="Faça uma pergunta... (ex: como criar site em HTML)">
-        <button class="search-btn" onclick="pesquisarConhecimento()">🔍</button>
     </div>
+
 
     <!-- Barra de pesquisa da aba "Gerenciar" -->
     <div id="pesquisaManage" class="search-container" style="display: none;">
@@ -1264,7 +1246,7 @@
                 <div class="form-group">
                     <label class="form-label">Linguagem (opcional)</label>
                     <select id="selecionarLinguagem" class="form-control">
-                        <option value="">Texto</option>
+                        <option value="json">JSON</option>
                         <option value="html">HTML</option>
                         <option value="css">CSS</option>
                         <option value="javascript">JavaScript</option>
@@ -1272,7 +1254,7 @@
                         <option value="java">Java</option>
                         <option value="php">PHP</option>
                         <option value="sql">SQL</option>
-                        <option value="json">JSON</option>
+                        <option value="">Texto</option>
                     </select>
                 </div>
 
@@ -1940,7 +1922,7 @@ public class DatabaseConnection {
                 resultadosPesquisa.innerHTML = `
                     <div class="card">
                         <h3>🤖 Bem-vindo à sua IA de Conhecimentos!</h3>
-                        <p>Faça uma pergunta na barra de pesquisa acima ou use a aba "Gerenciar" para adicionar novos conhecimentos.</p>
+                        <p>Faça uma pergunta na barra de pesquisa abaixo, tambem pode pressionar o botão de microfone verde, e adicionar uma nota rápida através de voz, ou use a aba "Gerenciar" para adicionar novos conhecimentos.</p>
                         <p><strong>Exemplos de perguntas:</strong></p>
                         <ul style="margin: 10px 0; padding-left: 20px;">
                             <li>Como criar um site em HTML</li>
