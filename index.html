@@ -650,6 +650,7 @@ let currentMood = '';
 let editingId = null;
 let confirmCallback = null;
 let searchQuery = '';
+let activeTab = 'entries';
 
 const MOODS = {
   feliz: '😊', grato: '🙏', neutro: '😐',
@@ -674,13 +675,35 @@ function switchTab(name, btn) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('view-' + name).classList.add('active');
-  if (name === 'stats') updateStats();
+  activeTab = name;
+
+  const searchInput = document.getElementById('searchInput');
+  const searchBar = document.querySelector('.search-bar');
+
+  if (name === 'entries') {
+    searchInput.placeholder = 'Buscar entradas...';
+    searchBar.style.display = '';
+  } else if (name === 'quicknotes') {
+    searchInput.placeholder = 'Buscar notas rápidas...';
+    searchBar.style.display = '';
+  } else {
+    // stats: hide search bar
+    searchBar.style.display = 'none';
+  }
+
+  // clear and re-apply search for the new tab
+  searchInput.value = '';
+  searchQuery = '';
+  if (name === 'entries') renderEntries();
+  else if (name === 'quicknotes') renderQuickNotes();
+  else updateStats();
 }
 
 // ===================== SEARCH =====================
 function handleSearch() {
   searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-  renderEntries();
+  if (activeTab === 'entries') renderEntries();
+  else if (activeTab === 'quicknotes') renderQuickNotes();
 }
 
 function highlight(text, query) {
@@ -898,16 +921,24 @@ async function addQuickNote() {
 
 function renderQuickNotes() {
   const list = document.getElementById('quickNotesList');
-  if (!quickNotes.length) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-title">Sem anotações rápidas</div></div>`;
+  let filtered = quickNotes;
+  if (searchQuery) {
+    filtered = quickNotes.filter(n => n.text.toLowerCase().includes(searchQuery));
+  }
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">⚡</div>
+      <div class="empty-title">${searchQuery ? 'Nenhum resultado' : 'Sem anotações rápidas'}</div>
+      <div class="empty-sub">${searchQuery ? 'Tente outros termos' : 'Escreva algo acima e salve'}</div>
+    </div>`;
     return;
   }
-  list.innerHTML = quickNotes.map(n => {
+  list.innerHTML = filtered.map(n => {
     const d = new Date(n.createdAt);
     const ds = d.toLocaleDateString('pt-BR', {day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
     return `<div class="quick-note-card">
-      <div>
-        <div class="quick-note-text">${escHtml(n.text)}</div>
+      <div style="flex:1">
+        <div class="quick-note-text">${highlight(n.text, searchQuery)}</div>
         <div class="quick-note-meta">📅 ${ds}</div>
       </div>
       <button class="quick-note-del" onclick="deleteQuickNote('${n.id}')">🗑️</button>
