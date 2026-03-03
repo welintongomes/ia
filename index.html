@@ -568,6 +568,27 @@
   </div>
 </div>
 
+<!-- EDIT QUICK NOTE MODAL -->
+<div class="modal-overlay" id="editQuickNoteModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Editar Nota Rápida</span>
+      <span class="modal-close" onclick="closeModal('editQuickNoteModal')">✕</span>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <div class="field-label">Texto</div>
+        <textarea id="editQuickNoteText" style="min-height:120px"></textarea>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:10px 12px;background:var(--card);border-radius:10px;border:1px solid var(--border)">
+        🕐 Criada em: <span id="editQuickNoteCreatedAt" style="color:var(--accent)"></span>
+      </div>
+      <button class="save-btn" onclick="saveEditQuickNote()">💾 Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM DIALOG -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
@@ -934,14 +955,21 @@ function renderQuickNotes() {
     return;
   }
   list.innerHTML = filtered.map(n => {
-    const d = new Date(n.createdAt);
-    const ds = d.toLocaleDateString('pt-BR', {day:'2-digit',month:'short'}) + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    const dc = new Date(n.createdAt);
+    const created = dc.toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'})
+      + ' às ' + dc.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    const editedBadge = n.updatedAt && n.updatedAt !== n.createdAt
+      ? `<span style="font-size:10px;color:var(--accent2);margin-left:6px">✏️ editada ${new Date(n.updatedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>`
+      : '';
     return `<div class="quick-note-card">
-      <div style="flex:1">
+      <div style="flex:1;min-width:0">
         <div class="quick-note-text">${highlight(n.text, searchQuery)}</div>
-        <div class="quick-note-meta">📅 ${ds}</div>
+        <div class="quick-note-meta">🕐 ${created}${editedBadge}</div>
       </div>
-      <button class="quick-note-del" onclick="deleteQuickNote('${n.id}')">🗑️</button>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-left:8px;flex-shrink:0">
+        <button class="quick-note-del" onclick="openEditQuickNote('${n.id}')" style="color:var(--accent)">✏️</button>
+        <button class="quick-note-del" onclick="deleteQuickNote('${n.id}')">🗑️</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -950,6 +978,35 @@ async function deleteQuickNote(id) {
   await dbDelete('quicknotes', id);
   quickNotes = quickNotes.filter(n => n.id !== id);
   renderQuickNotes();
+}
+
+let editingQuickNoteId = null;
+
+function openEditQuickNote(id) {
+  const note = quickNotes.find(n => n.id === id);
+  if (!note) return;
+  editingQuickNoteId = id;
+  document.getElementById('editQuickNoteText').value = note.text;
+  const dc = new Date(note.createdAt);
+  const created = dc.toLocaleDateString('pt-BR', {weekday:'short', day:'2-digit', month:'short', year:'numeric'})
+    + ' às ' + dc.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  document.getElementById('editQuickNoteCreatedAt').textContent = created;
+  document.getElementById('editQuickNoteModal').classList.add('open');
+  setTimeout(() => document.getElementById('editQuickNoteText').focus(), 350);
+}
+
+async function saveEditQuickNote() {
+  const text = document.getElementById('editQuickNoteText').value.trim();
+  if (!text) { showToast('⚠️ A nota não pode ficar vazia!'); return; }
+  const note = quickNotes.find(n => n.id === editingQuickNoteId);
+  if (!note) return;
+  const updated = { ...note, text, updatedAt: new Date().toISOString() };
+  await dbPut('quicknotes', updated);
+  quickNotes = quickNotes.map(n => n.id === editingQuickNoteId ? updated : n);
+  closeModal('editQuickNoteModal');
+  renderQuickNotes();
+  showToast('✅ Nota atualizada!');
+  editingQuickNoteId = null;
 }
 
 // document.getElementById('quickNoteText').addEventListener('keydown', e => {
@@ -1064,41 +1121,68 @@ function exportTXT() {
 }
 
 function download(filename, content, mime) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([content], {type: mime}));
-  a.download = filename; a.click();
+  try {
+    // Try Blob + createObjectURL first (desktop browsers)
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 500);
+  } catch(e) {
+    // Fallback: data URI (works in more mobile/WebView contexts)
+    const encoded = mime === 'application/json'
+      ? 'data:application/json;charset=utf-8,' + encodeURIComponent(content)
+      : 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
+    const a = document.createElement('a');
+    a.href = encoded;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 }
 
 async function importJSON(event) {
   const file = event.target.files[0];
   if (!file) return;
-  try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-    const imported = data.entries || [];
-    const importedNotes = data.quickNotes || [];
-    let count = 0;
-    for (const e of imported) {
-      if (!entries.find(x => x.id === e.id)) {
-        await dbPut('entries', e);
-        entries.unshift(e);
-        count++;
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = data.entries || [];
+      const importedNotes = data.quickNotes || [];
+      let countE = 0, countN = 0;
+      for (const entry of imported) {
+        if (!entries.find(x => x.id === entry.id)) {
+          await dbPut('entries', entry);
+          entries.unshift(entry);
+          countE++;
+        }
       }
-    }
-    for (const n of importedNotes) {
-      if (!quickNotes.find(x => x.id === n.id)) {
-        await dbPut('quicknotes', n);
-        quickNotes.unshift(n);
+      for (const n of importedNotes) {
+        if (!quickNotes.find(x => x.id === n.id)) {
+          await dbPut('quicknotes', n);
+          quickNotes.unshift(n);
+          countN++;
+        }
       }
+      entries.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      quickNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      renderEntries(); renderQuickNotes(); updateStats();
+      const msg = [];
+      if (countE) msg.push(`${countE} entrada${countE>1?'s':''}`);
+      if (countN) msg.push(`${countN} nota${countN>1?'s':''}`);
+      showToast(msg.length ? `✅ Importado: ${msg.join(' e ')}!` : '⚠️ Nada novo para importar');
+    } catch(err) {
+      showToast('❌ Arquivo inválido ou corrompido');
     }
-    entries.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-    quickNotes.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-    renderEntries(); renderQuickNotes(); updateStats();
-    showToast(`✅ ${count} entradas importadas!`);
-    event.target.value = '';
-  } catch(err) {
-    showToast('❌ Erro ao importar arquivo');
-  }
+  };
+  reader.onerror = () => showToast('❌ Erro ao ler o arquivo');
+  reader.readAsText(file, 'utf-8');
+  event.target.value = '';
 }
 
 // ===================== HELPERS =====================
