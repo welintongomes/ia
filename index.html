@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#1a0a2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Diário Pessoal</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0f0920;
@@ -390,6 +389,176 @@
 
   /* READING VIEW */
   .reading-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+
+  /* AUDIO */
+  .audio-card {
+    background: linear-gradient(135deg, rgba(192,132,252,0.08), rgba(129,140,248,0.08));
+    border: 1px solid rgba(192,132,252,0.25);
+    border-radius: 14px; padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .audio-player-wrap { flex: 1; min-width: 0; }
+  .audio-label { font-size: 12px; color: var(--accent); font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .audio-controls { display: flex; align-items: center; gap: 8px; }
+  .play-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--accent); border: none; color: #fff;
+    font-size: 14px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s;
+  }
+  .play-btn:active { transform: scale(0.9); }
+  .audio-progress-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .audio-progress {
+    width: 100%; height: 4px; background: var(--bg);
+    border-radius: 4px; overflow: hidden; cursor: pointer;
+  }
+  .audio-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.1s linear; pointer-events: none; }
+  .audio-time { font-size: 10px; color: var(--muted); }
+  .audio-note-meta { font-size: 10px; color: var(--muted); margin-top: 6px; }
+
+  /* RECORD MODAL */
+  .record-modal-body { padding: 24px 18px 32px; text-align: center; }
+  .record-circle {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: var(--card); border: 3px solid var(--border);
+    margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 36px; cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .record-circle.recording {
+    background: rgba(248,113,113,0.15);
+    border-color: var(--danger);
+    animation: pulse-ring 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(248,113,113,0.4); }
+    70% { box-shadow: 0 0 0 16px rgba(248,113,113,0); }
+    100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
+  }
+  .record-status { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .record-timer { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--accent); margin-bottom: 20px; letter-spacing: 2px; }
+  .waveform { display: flex; align-items: center; justify-content: center; gap: 3px; height: 32px; margin-bottom: 20px; }
+  .wave-bar {
+    width: 3px; background: var(--accent); border-radius: 3px;
+    height: 6px; transition: height 0.1s;
+  }
+  .recording .wave-bar { animation: wave-anim 0.6s ease-in-out infinite; }
+  .wave-bar:nth-child(2) { animation-delay: 0.1s !important; }
+  .wave-bar:nth-child(3) { animation-delay: 0.2s !important; }
+  .wave-bar:nth-child(4) { animation-delay: 0.3s !important; }
+  .wave-bar:nth-child(5) { animation-delay: 0.15s !important; }
+  .wave-bar:nth-child(6) { animation-delay: 0.25s !important; }
+  .wave-bar:nth-child(7) { animation-delay: 0.05s !important; }
+  @keyframes wave-anim {
+    0%, 100% { height: 4px; }
+    50% { height: 22px; }
+  }
+  .record-preview { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+  .record-actions { display: flex; gap: 10px; }
+  .record-actions button {
+    flex: 1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-discard { background: var(--card); color: var(--muted); border: 1px solid var(--border) !important; }
+  .btn-save-audio { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+  .btn-discard:active, .btn-save-audio:active { transform: scale(0.96); }
+
+  /* VOICE PLAYER */
+  .voice-player {
+    background: linear-gradient(135deg, rgba(129,140,248,0.1), rgba(192,132,252,0.1));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .voice-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .voice-btn:active { transform: scale(0.9); }
+  .voice-btn.paused { background: var(--card); color: var(--muted); border: 1px solid var(--border); }
+  .voice-info { flex: 1; }
+  .voice-title { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .voice-progress {
+    width: 100%;
+    height: 4px;
+    background: var(--bg);
+    border-radius: 2px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .voice-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+  .voice-time {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* QUICK NOTE VOICE */
+  .quick-note-voice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(129,140,248,0.1);
+    border-radius: 10px;
+    margin-top: 8px;
+  }
+  .quick-note-voice-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .quick-note-voice-info { flex: 1; }
+  .quick-note-voice-progress {
+    width: 100%;
+    height: 3px;
+    background: var(--bg);
+    border-radius: 1.5px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .quick-note-voice-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 1.5px;
+    transition: width 0.1s linear;
+  }
+  .quick-note-voice-time {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
 </style>
 </head>
 <body>
@@ -425,7 +594,10 @@
     <div id="view-quicknotes" class="view">
       <div class="quick-note-input-row">
         <textarea id="quickNoteText" placeholder="Anotação rápida..."></textarea>
-        <button onclick="addQuickNote()">+</button>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button onclick="addQuickNote()" style="width:44px;height:44px;border-radius:12px;background:var(--accent);border:none;color:#fff;font-size:20px;cursor:pointer;flex-shrink:0;">+</button>
+          <button onclick="openRecordModal()" title="Gravar áudio" style="width:44px;height:44px;border-radius:12px;background:var(--card2);border:1px solid var(--border);color:var(--accent);font-size:20px;cursor:pointer;flex-shrink:0;">🎙️</button>
+        </div>
       </div>
       <div id="quickNotesList" class="quick-notes-area"></div>
     </div>
@@ -568,6 +740,49 @@
   </div>
 </div>
 
+<!-- RECORD AUDIO MODAL -->
+<div class="modal-overlay" id="recordModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">🎙️ Gravar Áudio</span>
+      <span class="modal-close" onclick="closeRecordModal()">✕</span>
+    </div>
+    <div class="record-modal-body">
+      <!-- idle / recording state -->
+      <div id="recordIdleArea">
+        <div class="record-circle" id="recordCircle" onclick="toggleRecording()">🎙️</div>
+        <div class="record-status" id="recordStatus">Toque para gravar</div>
+        <div class="record-timer" id="recordTimer">0:00</div>
+        <div class="waveform" id="waveform">
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+      </div>
+      <!-- preview state (after recording) -->
+      <div id="recordPreviewArea" style="display:none">
+        <div class="record-preview">
+          <div class="audio-label">🎵 Pré-visualização</div>
+          <div class="audio-controls">
+            <button class="play-btn" id="previewPlayBtn" onclick="togglePreviewPlay()">▶</button>
+            <div class="audio-progress-wrap">
+              <div class="audio-progress" onclick="seekPreview(event)">
+                <div class="audio-progress-fill" id="previewProgressFill" style="width:0%"></div>
+              </div>
+              <div class="audio-time" id="previewTime">0:00 / 0:00</div>
+            </div>
+          </div>
+        </div>
+        <div class="record-actions">
+          <button class="btn-discard" onclick="discardRecording()">🗑️ Descartar</button>
+          <button class="btn-save-audio" onclick="saveAudioNote()">💾 Salvar Nota</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- EDIT QUICK NOTE MODAL -->
 <div class="modal-overlay" id="editQuickNoteModal">
   <div class="modal">
@@ -677,6 +892,59 @@ const MOODS = {
   feliz: '😊', grato: '🙏', neutro: '😐',
   triste: '😔', ansioso: '😰', raiva: '😠'
 };
+
+// ===================== VOICE SYNTHESIS =====================
+let voicePlayers = {}; // Para controlar múltiplas leituras
+let currentVoice = null;
+
+function speakText(text, elementId) {
+  // Para qualquer leitura anterior
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+  
+  if (voicePlayers[elementId] && voicePlayers[elementId].playing) {
+    // Se já está tocando, para
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    voicePlayers[elementId].playing = false;
+    updateVoiceButton(elementId, false);
+    return;
+  }
+  
+  // Cria novo utterance
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'pt-BR';
+  utterance.rate = 0.9; // Velocidade um pouco mais lenta
+  utterance.pitch = 1;
+  utterance.volume = 1;
+  
+  utterance.onstart = () => {
+    voicePlayers[elementId] = { playing: true };
+    updateVoiceButton(elementId, true);
+  };
+  
+  utterance.onend = () => {
+    voicePlayers[elementId] = { playing: false };
+    updateVoiceButton(elementId, false);
+  };
+  
+  utterance.onerror = () => {
+    voicePlayers[elementId] = { playing: false };
+    updateVoiceButton(elementId, false);
+  };
+  
+  window.speechSynthesis.speak(utterance);
+}
+
+function updateVoiceButton(elementId, isPlaying) {
+  const btn = document.getElementById(`voice-btn-${elementId}`);
+  if (btn) {
+    btn.innerHTML = isPlaying ? '⏸️' : '🔊';
+    btn.classList.toggle('paused', isPlaying);
+  }
+}
 
 // ===================== INIT =====================
 async function init() {
@@ -908,6 +1176,21 @@ function viewEntry(id) {
   const timeStr = d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
   const tags = (e.tags||[]).map(t => `<span class="meta-chip">#${escHtml(t)}</span>`).join('');
 
+  const voicePlayerId = `view-${e.id}`;
+  const voiceButton = `<div class="voice-player">
+    <button class="voice-btn" id="voice-btn-${voicePlayerId}" onclick="speakText(\`${escHtml(e.title + '. ' + e.content).replace(/`/g, '\\`')}\`, '${voicePlayerId}')">🔊</button>
+    <div class="voice-info">
+      <div class="voice-title">Leitura em voz alta</div>
+      <div class="voice-progress" onclick="event.stopPropagation()">
+        <div class="voice-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="voice-time">
+        <span>0:00</span>
+        <span>${Math.floor((e.content || '').split(' ').length / 150)}:${String(Math.floor(((e.content || '').split(' ').length / 150 * 60) % 60)).padStart(2, '0')}</span>
+      </div>
+    </div>
+  </div>`;
+
   document.getElementById('viewContent').innerHTML = `
     <div class="view-meta-row">
       <span class="meta-chip">📅 ${dateStr}</span>
@@ -918,6 +1201,7 @@ function viewEntry(id) {
     ${tags ? `<div class="view-meta-row">${tags}</div>` : ''}
     <div class="view-title">${escHtml(e.title||'Sem título')}</div>
     <div class="view-body">${escHtml(e.content||'')}</div>
+    ${voiceButton}
     <div class="view-actions">
       <button class="action-btn primary" onclick="editEntry('${e.id}');closeViewModal()">✏️ Editar</button>
       <button class="action-btn danger-btn" onclick="confirmDelete('${e.id}');closeViewModal()">🗑️ Excluir</button>
@@ -950,7 +1234,7 @@ function renderQuickNotes() {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-icon">⚡</div>
       <div class="empty-title">${searchQuery ? 'Nenhum resultado' : 'Sem anotações rápidas'}</div>
-      <div class="empty-sub">${searchQuery ? 'Tente outros termos' : 'Escreva algo acima e salve'}</div>
+      <div class="empty-sub">${searchQuery ? 'Tente outros termos' : 'Escreva algo acima ou grave um áudio 🎙️'}</div>
     </div>`;
     return;
   }
@@ -961,10 +1245,26 @@ function renderQuickNotes() {
     const editedBadge = n.updatedAt && n.updatedAt !== n.createdAt
       ? `<span style="font-size:10px;color:var(--accent2);margin-left:6px">✏️ editada ${new Date(n.updatedAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>`
       : '';
+
+    const voicePlayerId = `qn-${n.id}`;
+
+    if (n.type === 'audio') {
+      return audioCardHTML(n, created);
+    }
+
     return `<div class="quick-note-card">
       <div style="flex:1;min-width:0">
         <div class="quick-note-text">${highlight(n.text, searchQuery)}</div>
         <div class="quick-note-meta">🕐 ${created}${editedBadge}</div>
+        <div class="quick-note-voice">
+          <button class="quick-note-voice-btn" id="voice-btn-${voicePlayerId}" onclick="speakText(\`${escHtml(n.text).replace(/`/g, '\\`')}\`, '${voicePlayerId}')">🔊</button>
+          <div class="quick-note-voice-info">
+            <div class="quick-note-voice-progress" onclick="event.stopPropagation()">
+              <div class="quick-note-voice-fill" style="width:0%"></div>
+            </div>
+            <div class="quick-note-voice-time">${Math.floor((n.text || '').split(' ').length / 150)}:${String(Math.floor(((n.text || '').split(' ').length / 150 * 60) % 60)).padStart(2, '0')}</div>
+          </div>
+        </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;margin-left:8px;flex-shrink:0">
         <button class="quick-note-del" onclick="openEditQuickNote('${n.id}')" style="color:var(--accent)">✏️</button>
@@ -972,6 +1272,28 @@ function renderQuickNotes() {
       </div>
     </div>`;
   }).join('');
+}
+
+function audioCardHTML(n, created) {
+  console.log("DURATION RECEBIDA:", n.duration);
+  return `<div class="audio-card">
+    <div class="audio-player-wrap">
+      <div class="audio-label">🎙️ Nota de Áudio · ${fmtTime(Number(n.duration) || 0)}</div>
+      <div class="audio-controls">
+        <button class="play-btn" id="playbtn_${n.id}" onclick="toggleAudioPlay('${n.id}')">▶</button>
+        <div class="audio-progress-wrap">
+          <div class="audio-progress" onclick="seekAudio('${n.id}', event)">
+            <div class="audio-progress-fill" id="fill_${n.id}" style="width:0%"></div>
+          </div>
+          <div class="audio-time" id="time_${n.id}">0:00 / ${fmtTime(Number(n.duration) || 0)}</div>
+        </div>
+      </div>
+      <div class="audio-note-meta">🕐 ${created}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-left:8px;flex-shrink:0">
+      <button class="quick-note-del" onclick="deleteQuickNote('${n.id}')">🗑️</button>
+    </div>
+  </div>`;
 }
 
 async function deleteQuickNote(id) {
@@ -984,7 +1306,7 @@ let editingQuickNoteId = null;
 
 function openEditQuickNote(id) {
   const note = quickNotes.find(n => n.id === id);
-  if (!note) return;
+  if (!note || note.type === 'audio') return;
   editingQuickNoteId = id;
   document.getElementById('editQuickNoteText').value = note.text;
   const dc = new Date(note.createdAt);
@@ -1009,9 +1331,300 @@ async function saveEditQuickNote() {
   editingQuickNoteId = null;
 }
 
-// document.getElementById('quickNoteText').addEventListener('keydown', e => {
-//   if (e.key === 'Enter' && e.ctrlKey) addQuickNote();
-// });
+// ===================== AUDIO RECORDING =====================
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingTimerInterval = null;
+let recordingSeconds = 0;
+let recordedBlob = null;
+let recordedBase64 = null;
+let previewAudio = null;
+let previewProgressInterval = null;
+
+function openRecordModal() {
+  resetRecordUI();
+  document.getElementById('recordModal').classList.add('open');
+}
+
+function closeRecordModal() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+  stopRecordingTimer();
+  if (previewAudio) { previewAudio.pause(); previewAudio = null; }
+  clearInterval(previewProgressInterval);
+  document.getElementById('recordModal').classList.remove('open');
+  resetRecordUI();
+}
+
+function resetRecordUI() {
+  recordedBlob = null; recordedBase64 = null; audioChunks = [];
+  recordingSeconds = 0;
+  document.getElementById('recordCircle').classList.remove('recording');
+  document.getElementById('recordCircle').textContent = '🎙️';
+  document.getElementById('recordStatus').textContent = 'Toque para gravar';
+  document.getElementById('recordTimer').textContent = '0:00';
+  document.getElementById('waveform').classList.remove('recording');
+  document.getElementById('recordIdleArea').style.display = '';
+  document.getElementById('recordPreviewArea').style.display = 'none';
+  document.getElementById('previewProgressFill').style.width = '0%';
+  document.getElementById('previewTime').textContent = '0:00 / 0:00';
+  document.getElementById('previewPlayBtn').textContent = '▶';
+}
+
+async function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+
+    // ================= STOP =================
+    mediaRecorder.stop();
+    stopRecordingTimer();
+
+    document.getElementById('recordCircle').classList.remove('recording');
+    document.getElementById('recordCircle').textContent = '⏹️';
+    document.getElementById('recordStatus').textContent = 'Processando...';
+    document.getElementById('waveform').classList.remove('recording');
+
+  } else {
+
+    // ================= START =================
+    try {
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+
+      const mimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/mp4',
+        'audio/ogg'
+      ].find(m => MediaRecorder.isTypeSupported(m)) || '';
+
+      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+
+        stream.getTracks().forEach(t => t.stop());
+
+        const type = mediaRecorder.mimeType || 'audio/webm';
+        recordedBlob = new Blob(audioChunks, { type });
+        recordedBase64 = await blobToBase64(recordedBlob);
+
+        const audioUrl = URL.createObjectURL(recordedBlob);
+        const audio = new Audio(audioUrl);
+
+        audio.addEventListener("loadedmetadata", () => {
+
+          // 🔥 CORREÇÃO DEFINITIVA DO INFINITY
+          if (!isFinite(audio.duration) || audio.duration === Infinity) {
+
+            audio.currentTime = 1e101;
+
+            audio.addEventListener("timeupdate", function handler() {
+              audio.removeEventListener("timeupdate", handler);
+
+              recordingSeconds = Math.round(audio.duration);
+              audio.currentTime = 0;
+
+              showRecordPreview(recordedBlob, type);
+              URL.revokeObjectURL(audioUrl);
+            });
+
+          } else {
+
+            recordingSeconds = Math.round(audio.duration);
+            showRecordPreview(recordedBlob, type);
+            URL.revokeObjectURL(audioUrl);
+
+          }
+
+        });
+
+      };
+
+      mediaRecorder.start(100);
+
+      document.getElementById('recordCircle').classList.add('recording');
+      document.getElementById('recordCircle').textContent = '⏹️';
+      document.getElementById('recordStatus').textContent = 'Gravando... toque para parar';
+      document.getElementById('waveform').classList.add('recording');
+
+      startRecordingTimer();
+
+    } catch (err) {
+      showToast('❌ Sem permissão para o microfone');
+    }
+  }
+}
+
+function startRecordingTimer() {
+  recordingSeconds = 0;
+  recordingTimerInterval = setInterval(() => {
+    recordingSeconds++;
+    const m = Math.floor(recordingSeconds / 60);
+    const s = String(recordingSeconds % 60).padStart(2, '0');
+    document.getElementById('recordTimer').textContent = `${m}:${s}`;
+    // Auto-stop at 5 minutes
+    if (recordingSeconds >= 300) toggleRecording();
+  }, 1000);
+}
+
+function stopRecordingTimer() {
+  clearInterval(recordingTimerInterval);
+  recordingTimerInterval = null;
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+function showRecordPreview(blob, type) {
+  document.getElementById('recordIdleArea').style.display = 'none';
+  document.getElementById('recordPreviewArea').style.display = '';
+  document.getElementById('recordStatus').textContent = '';
+
+  if (previewAudio) { previewAudio.pause(); }
+  previewAudio = new Audio(URL.createObjectURL(blob));
+  previewAudio.onended = () => {
+    document.getElementById('previewPlayBtn').textContent = '▶';
+    clearInterval(previewProgressInterval);
+  };
+  previewAudio.onloadedmetadata = () => {
+    updatePreviewTime();
+  };
+}
+
+function togglePreviewPlay() {
+  if (!previewAudio) return;
+  if (previewAudio.paused) {
+    previewAudio.play();
+    document.getElementById('previewPlayBtn').textContent = '⏸';
+    previewProgressInterval = setInterval(updatePreviewTime, 200);
+  } else {
+    previewAudio.pause();
+    document.getElementById('previewPlayBtn').textContent = '▶';
+    clearInterval(previewProgressInterval);
+  }
+}
+
+function updatePreviewTime() {
+  if (!previewAudio) return;
+  const cur = previewAudio.currentTime;
+  const dur = previewAudio.duration || 0;
+  const pct = dur ? (cur / dur * 100).toFixed(1) : 0;
+  document.getElementById('previewProgressFill').style.width = pct + '%';
+  document.getElementById('previewTime').textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+}
+
+function seekPreview(e) {
+  if (!previewAudio || !previewAudio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  previewAudio.currentTime = pct * previewAudio.duration;
+  updatePreviewTime();
+}
+
+function fmtTime(s) {
+  if (!isFinite(s)) return '0:00';
+
+  s = Math.floor(Number(s));
+  const m = Math.floor(s / 60);
+  const sec = String(s % 60).padStart(2, '0');
+
+  return `${m}:${sec}`;
+}
+
+function discardRecording() {
+  if (previewAudio) { previewAudio.pause(); previewAudio = null; }
+  clearInterval(previewProgressInterval);
+  resetRecordUI();
+}
+
+async function saveAudioNote() {
+  if (!recordedBase64) return;
+  // Usar a duração real já calculada
+  const dur = recordingSeconds;
+  const type = recordedBlob.type || 'audio/webm';
+  const note = {
+    id: 'q_' + Date.now(),
+    type: 'audio',
+    audioBase64: recordedBase64,
+    audioMime: type,
+    duration: dur,
+    text: `🎙️ Áudio (${fmtTime(dur)})`,
+    createdAt: new Date().toISOString()
+  };
+  await dbPut('quicknotes', note);
+  quickNotes.unshift(note);
+  closeRecordModal();
+  renderQuickNotes();
+  showToast('🎙️ Áudio salvo!');
+}
+
+// ---- Audio playback in list ----
+const audioPlayers = {}; // id -> { audio, interval }
+
+function toggleAudioPlay(id) {
+  const note = quickNotes.find(n => n.id === id);
+  if (!note || !note.audioBase64) return;
+
+  // Stop any other playing
+  Object.keys(audioPlayers).forEach(k => {
+    if (k !== id && audioPlayers[k]) {
+      audioPlayers[k].audio.pause();
+      clearInterval(audioPlayers[k].interval);
+      const btn = document.getElementById('playbtn_' + k);
+      if (btn) btn.textContent = '▶';
+    }
+  });
+
+  if (!audioPlayers[id]) {
+    audioPlayers[id] = { audio: new Audio(note.audioBase64), interval: null };
+    audioPlayers[id].audio.onended = () => {
+      const btn = document.getElementById('playbtn_' + id);
+      if (btn) btn.textContent = '▶';
+      clearInterval(audioPlayers[id].interval);
+      const fill = document.getElementById('fill_' + id);
+      if (fill) fill.style.width = '0%';
+    };
+  }
+
+  const player = audioPlayers[id];
+  const btn = document.getElementById('playbtn_' + id);
+
+  if (player.audio.paused) {
+    player.audio.play();
+    if (btn) btn.textContent = '⏸';
+    player.interval = setInterval(() => {
+      const dur = player.audio.duration || 0;
+      const cur = player.audio.currentTime;
+      const fill = document.getElementById('fill_' + id);
+      const timeEl = document.getElementById('time_' + id);
+      if (fill) fill.style.width = dur ? (cur / dur * 100).toFixed(1) + '%' : '0%';
+      if (timeEl) timeEl.textContent = `${fmtTime(cur)} / ${fmtTime(dur)}`;
+    }, 200);
+  } else {
+    player.audio.pause();
+    if (btn) btn.textContent = '▶';
+    clearInterval(player.interval);
+  }
+}
+
+function seekAudio(id, e) {
+  if (!audioPlayers[id]) return;
+  const audio = audioPlayers[id].audio;
+  if (!audio.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+}
 
 // ===================== STATS =====================
 function updateStats() {
