@@ -823,6 +823,8 @@ let db;
 const DB_NAME = 'DiarioApp';
 const DB_VERSION = 2;
 
+const audioPlayers = {};
+
 function initDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -897,45 +899,406 @@ const MOODS = {
 let voicePlayers = {}; // Para controlar múltiplas leituras
 let currentVoice = null;
 
-function speakText(text, elementId) {
-  // Para qualquer leitura anterior
-  if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
+function formatTime(seconds) {
+  if (isNaN(seconds) || seconds === Infinity || seconds === undefined || seconds === null) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Função principal de leitura
+function speakText(text, playerId) {
+  // Parar qualquer áudio que esteja tocando deste player específico
+  if (audioPlayers[playerId]) {
+    stopVoicePlayer(playerId);
   }
   
-  if (voicePlayers[elementId] && voicePlayers[elementId].playing) {
-    // Se já está tocando, para
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    voicePlayers[elementId].playing = false;
-    updateVoiceButton(elementId, false);
-    return;
+  // Se já tem um player existente e não está tocando, remover referência
+  if (audioPlayers[playerId]) {
+    delete audioPlayers[playerId];
   }
   
-  // Cria novo utterance
+  // Estimar duração (150 palavras por minuto)
+  const wordCount = text.split(' ').length;
+  const estimatedSeconds = Math.max(1, Math.ceil((wordCount / 150) * 60));
+  
+  // Criar utterance
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'pt-BR';
-  utterance.rate = 0.9; // Velocidade um pouco mais lenta
-  utterance.pitch = 1;
-  utterance.volume = 1;
+  utterance.rate = 1.0;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
   
+  // Obter vozes disponíveis (opcional - tenta usar voz feminina em português)
+  const voices = window.speechSynthesis.getVoices();
+  const portugueseVoice = voices.find(v => v.lang.includes('pt') && v.name.includes('Female'));
+  if (portugueseVoice) {
+    utterance.voice = portugueseVoice;
+  }
+  
+  // Criar objeto do player
+  audioPlayers[playerId] = {
+    utterance: utterance,
+    isPlaying: false,
+    isPaused: false,
+    interval: null,
+    duration: estimatedSeconds,
+    currentTime: 0,
+    text: text // Guardar texto para recriar se necessário
+  };
+  
+  // Evento quando começa
   utterance.onstart = () => {
-    voicePlayers[elementId] = { playing: true };
-    updateVoiceButton(elementId, true);
+    console.log('Iniciou leitura');
+    audioPlayers[playerId].isPlaying = true;
+    audioPlayers[playerId].isPaused = false;
+    audioPlayers[playerId].startTime = Date.now();
+    
+    // Atualizar UI
+    updateVoicePlayerUI(playerId, 0, estimatedSeconds, 0);
+    
+    // Iniciar intervalo de atualização
+    startProgressInterval(playerId);
   };
   
+  // Evento quando chega em uma palavra (para atualizar progresso mais precisamente)
+  utterance.onboundary = (event) => {
+    if (audioPlayers[playerId] && audioPlayers[playerId].isPlaying) {
+      // Estimar progresso baseado no caractere
+      const charIndex = event.charIndex;
+      const totalChars = text.length;
+      const progressPercent = (charIndex / totalChars) * 100;
+      const currentSeconds = (progressPercent / 100) * estimatedSeconds;
+      
+      audioPlayers[playerId].currentTime = currentSeconds;
+      
+      // Atualizar UI
+      updateVoicePlayerUI(playerId, currentSeconds, estimatedSeconds, progressPercent);
+    }
+  };
+  
+  // Evento quando termina
   utterance.onend = () => {
-    voicePlayers[elementId] = { playing: false };
-    updateVoiceButton(elementId, false);
+    console.log('Terminou leitura');
+    finishVoicePlayer(playerId);
   };
   
-  utterance.onerror = () => {
-    voicePlayers[elementId] = { playing: false };
-    updateVoiceButton(elementId, false);
+  // Evento de erro
+  utterance.onerror = (event) => {
+    console.error('Erro na leitura:', event);
+    // Se for erro de pausa/retomada, tentar recriar
+    if (event.error === 'interrupted' || event.error === 'canceled') {
+      // Não fazer nada, só limpar
+    }
+    finishVoicePlayer(playerId);
   };
   
-  window.speechSynthesis.speak(utterance);
+  // Tentar falar
+  try {
+    window.speechSynthesis.cancel(); // Cancelar qualquer fala anterior
+    window.speechSynthesis.speak(utterance);
+    
+    // Atualizar botões
+    updateVoicePlayerButtons(playerId, 'playing');
+  } catch (error) {
+    console.error('Erro ao iniciar fala:', error);
+    showToast('❌ Erro ao iniciar leitura');
+  }
+}
+// Função para pausar
+function pauseVoicePlayer(playerId) {
+  const player = audioPlayers[playerId];
+  if (!player) return;
+  
+  if (player.isPlaying && !player.isPaused) {
+    try {
+      window.speechSynthesis.pause();
+      player.isPaused = true;
+      player.isPlaying = false;
+      
+      // Guardar tempo atual
+      if (player.startTime) {
+        player.currentTime = (Date.now() - player.startTime) / 1000;
+      }
+      
+      // Parar intervalo de atualização
+      if (player.interval) {
+        clearInterval(player.interval);
+        player.interval = null;
+      }
+      
+      // Atualizar botão
+      const btn = document.getElementById(`voice-btn-${playerId}`);
+      if (btn) {
+        btn.textContent = '▶';
+        btn.setAttribute('onclick', `resumeVoicePlayer('${playerId}')`);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao pausar:', error);
+      // Se não conseguir pausar, para e recria depois
+      stopVoicePlayer(playerId);
+    }
+  }
+}
+
+// Função para continuar
+function resumeVoicePlayer(playerId) {
+  const player = audioPlayers[playerId];
+  if (!player) return;
+  
+  try {
+    window.speechSynthesis.resume();
+    player.isPlaying = true;
+    player.isPaused = false;
+    player.startTime = Date.now() - (player.currentTime * 1000);
+    
+    // Reiniciar intervalo
+    startProgressInterval(playerId);
+    
+    // Atualizar botão
+    const btn = document.getElementById(`voice-btn-${playerId}`);
+    if (btn) {
+      btn.textContent = '⏸️';
+      btn.setAttribute('onclick', `pauseVoicePlayer('${playerId}')`);
+    }
+    
+  } catch (error) {
+    console.error('Erro ao continuar:', error);
+    // Se não conseguir continuar, recria a fala do ponto atual
+    if (player.text) {
+      const words = player.text.split(' ');
+      const wordsToKeep = Math.floor((player.currentTime / player.duration) * words.length);
+      const remainingText = words.slice(wordsToKeep).join(' ');
+      
+      // Parar o atual
+      stopVoicePlayer(playerId);
+      
+      // Criar novo com o texto restante
+      setTimeout(() => {
+        speakText(remainingText, playerId);
+      }, 100);
+    }
+  }
+}
+
+// Função para parar completamente
+function stopVoicePlayer(playerId) {
+  const player = audioPlayers[playerId];
+  
+  // Cancelar a fala atual
+  try {
+    window.speechSynthesis.cancel();
+  } catch (error) {
+    console.error('Erro ao cancelar:', error);
+  }
+  
+  // Limpar intervalo
+  if (player && player.interval) {
+    clearInterval(player.interval);
+  }
+  
+  // Resetar UI
+  updateVoicePlayerUI(playerId, 0, 0, 0);
+  
+  // Remover player
+  delete audioPlayers[playerId];
+  
+  // Atualizar botão principal
+  const btn = document.getElementById(`voice-btn-${playerId}`);
+  if (btn) {
+    btn.textContent = '🔊';
+    btn.setAttribute('onclick', `speakText(window.currentViewText, '${playerId}')`);
+  }
+  
+  // Remover botão de parar se existir
+  const stopBtn = document.getElementById(`voice-stop-${playerId}`);
+  if (stopBtn) stopBtn.remove();
+}
+
+// Função para finalizar normalmente
+function finishVoicePlayer(playerId) {
+  const player = audioPlayers[playerId];
+  
+  // Limpar intervalo
+  if (player && player.interval) {
+    clearInterval(player.interval);
+  }
+  
+  // Resetar UI
+  updateVoicePlayerUI(playerId, player?.duration || 0, player?.duration || 0, 100);
+  
+  // Pequeno delay antes de resetar completamente
+  setTimeout(() => {
+    updateVoicePlayerUI(playerId, 0, 0, 0);
+    
+    // Atualizar botão principal
+    const btn = document.getElementById(`voice-btn-${playerId}`);
+    if (btn) {
+      btn.textContent = '🔊';
+      btn.setAttribute('onclick', `speakText(window.currentViewText, '${playerId}')`);
+    }
+    
+    // Remover botão de parar
+    const stopBtn = document.getElementById(`voice-stop-${playerId}`);
+    if (stopBtn) stopBtn.remove();
+    
+    // Remover player
+    delete audioPlayers[playerId];
+  }, 500);
+}
+// Função para iniciar intervalo de progresso
+function startProgressInterval(playerId) {
+  const player = audioPlayers[playerId];
+  if (!player) return;
+  
+  if (player.interval) {
+    clearInterval(player.interval);
+  }
+  
+  player.interval = setInterval(() => {
+    if (!player.isPlaying || player.isPaused) return;
+    
+    const elapsed = (Date.now() - player.startTime) / 1000;
+    if (elapsed >= player.duration) return;
+    
+    const progress = (elapsed / player.duration) * 100;
+    updateVoicePlayerUI(playerId, elapsed, player.duration, progress);
+  }, 100);
+}
+// Função para atualizar UI do player
+function updateVoicePlayerUI(playerId, current, total, progress) {
+  const progressBar = document.getElementById(`progress-${playerId}`);
+  const timeDisplay = document.getElementById(`time-${playerId}`);
+  
+  if (progressBar) {
+    progressBar.style.width = `${Math.min(progress, 100)}%`;
+  }
+  
+  if (timeDisplay) {
+    const currentSpan = timeDisplay.children[0];
+    const totalSpan = timeDisplay.children[1];
+    if (currentSpan) {
+      currentSpan.textContent = formatTime(current);
+    }
+    if (totalSpan) {
+      totalSpan.textContent = formatTime(total);
+    }
+  }
+}
+
+// Função para atualizar botões
+function updateVoicePlayerButtons(playerId, state) {
+  const btn = document.getElementById(`voice-btn-${playerId}`);
+  if (!btn) return;
+  
+  // Remover botão de parar antigo
+  const oldStopBtn = document.getElementById(`voice-stop-${playerId}`);
+  if (oldStopBtn) oldStopBtn.remove();
+  
+  if (state === 'playing') {
+    btn.textContent = '⏸️';
+    btn.setAttribute('onclick', `pauseVoicePlayer('${playerId}')`);
+    
+    // Adicionar botão de parar
+    const stopBtn = document.createElement('button');
+    stopBtn.id = `voice-stop-${playerId}`;
+    stopBtn.textContent = '⏹️';
+    stopBtn.className = 'voice-btn stop-btn';
+    stopBtn.setAttribute('onclick', `stopVoicePlayer('${playerId}')`);
+    stopBtn.style.marginLeft = '4px';
+    
+    btn.parentNode.insertBefore(stopBtn, btn.nextSibling);
+  }
+}
+
+function toggleAudioPlay(audioId) {
+  const audio = audioPlayers[audioId];
+  
+  if (!audio) {
+    // Criar novo player
+    const note = quickNotes.find(n => n.id === audioId);
+    if (!note || !note.audioBase64) return;
+    
+    const audioUrl = `data:${note.audioType};base64,${note.audioBase64}`;
+    const audioElement = new Audio(audioUrl);
+    
+    audioPlayers[audioId] = {
+      element: audioElement,
+      isPlaying: false,
+      interval: null
+    };
+    
+    // Configurar eventos
+    audioElement.onloadedmetadata = () => {
+      const duration = audioElement.duration;
+      document.getElementById(`time_${audioId}`).textContent = 
+        `0:00 / ${formatTime(duration)}`;
+    };
+    
+    audioElement.onplay = () => startAudioProgress(audioId);
+    audioElement.onpause = () => stopAudioProgress(audioId);
+    audioElement.onended = () => {
+      stopAudioProgress(audioId);
+      document.getElementById(`playbtn_${audioId}`).textContent = '▶';
+      document.getElementById(`fill_${audioId}`).style.width = '0%';
+      document.getElementById(`time_${audioId}`).textContent = 
+        `0:00 / ${formatTime(audioElement.duration || 0)}`;
+    };
+    
+    toggleAudioPlay(audioId); // Chamar recursivamente para tocar
+  } else {
+    // Toggle existente
+    if (audio.isPlaying) {
+      audio.element.pause();
+      stopAudioProgress(audioId);
+      document.getElementById(`playbtn_${audioId}`).textContent = '▶';
+    } else {
+      audio.element.play();
+      document.getElementById(`playbtn_${audioId}`).textContent = '⏸️';
+    }
+    audio.isPlaying = !audio.isPlaying;
+  }
+}
+
+function startAudioProgress(audioId) {
+  const audio = audioPlayers[audioId];
+  if (!audio || !audio.element) return;
+  
+  stopAudioProgress(audioId); // Limpar intervalo anterior
+  
+  audio.interval = setInterval(() => {
+    if (!audio.element || audio.element.paused) return;
+    
+    const current = audio.element.currentTime;
+    const duration = audio.element.duration || 0;
+    const progress = (current / duration) * 100;
+    
+    document.getElementById(`fill_${audioId}`).style.width = `${progress}%`;
+    document.getElementById(`time_${audioId}`).textContent = 
+      `${formatTime(current)} / ${formatTime(duration)}`;
+  }, 100);
+}
+
+function stopAudioProgress(audioId) {
+  if (audioPlayers[audioId] && audioPlayers[audioId].interval) {
+    clearInterval(audioPlayers[audioId].interval);
+  }
+}
+
+function seekAudio(audioId, event) {
+  const audio = audioPlayers[audioId];
+  if (!audio || !audio.element) return;
+  
+  const progressBar = event.currentTarget;
+  const rect = progressBar.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const width = rect.width;
+  const percentage = clickX / width;
+  
+  if (audio.element.duration) {
+    audio.element.currentTime = percentage * audio.element.duration;
+  }
 }
 
 function updateVoiceButton(elementId, isPlaying) {
@@ -1171,26 +1534,37 @@ async function saveEntry() {
 function viewEntry(id) {
   const e = entries.find(x => x.id === id);
   if (!e) return;
+  
   const d = new Date(e.createdAt);
   const dateStr = d.toLocaleDateString('pt-BR', {weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   const timeStr = d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
   const tags = (e.tags||[]).map(t => `<span class="meta-chip">#${escHtml(t)}</span>`).join('');
-
+  
+  // Guardar texto globalmente
+  window.currentViewText = escHtml(e.title + '. ' + e.content).replace(/`/g, '\\`');
+  
+  // Calcular duração estimada
+  const wordCount = (e.content || '').split(' ').length;
+  const estimatedMinutes = Math.floor(wordCount / 150);
+  const estimatedSeconds = Math.floor((wordCount / 150 * 60) % 60);
+  const estimatedDuration = formatTime(estimatedMinutes * 60 + estimatedSeconds);
+  
   const voicePlayerId = `view-${e.id}`;
+  
   const voiceButton = `<div class="voice-player">
-    <button class="voice-btn" id="voice-btn-${voicePlayerId}" onclick="speakText(\`${escHtml(e.title + '. ' + e.content).replace(/`/g, '\\`')}\`, '${voicePlayerId}')">🔊</button>
+    <button class="voice-btn" id="voice-btn-${voicePlayerId}" onclick="speakText(window.currentViewText, '${voicePlayerId}')">🔊</button>
     <div class="voice-info">
       <div class="voice-title">Leitura em voz alta</div>
       <div class="voice-progress" onclick="event.stopPropagation()">
-        <div class="voice-progress-fill" style="width:0%"></div>
+        <div class="voice-progress-fill" id="progress-${voicePlayerId}" style="width:0%"></div>
       </div>
-      <div class="voice-time">
+      <div class="voice-time" id="time-${voicePlayerId}">
         <span>0:00</span>
-        <span>${Math.floor((e.content || '').split(' ').length / 150)}:${String(Math.floor(((e.content || '').split(' ').length / 150 * 60) % 60)).padStart(2, '0')}</span>
+        <span>${estimatedDuration}</span>
       </div>
     </div>
   </div>`;
-
+  
   document.getElementById('viewContent').innerHTML = `
     <div class="view-meta-row">
       <span class="meta-chip">📅 ${dateStr}</span>
@@ -1207,6 +1581,12 @@ function viewEntry(id) {
       <button class="action-btn danger-btn" onclick="confirmDelete('${e.id}');closeViewModal()">🗑️ Excluir</button>
     </div>
   `;
+  
+  // Limpar qualquer player anterior deste ID
+  if (audioPlayers[voicePlayerId]) {
+    stopVoicePlayer(voicePlayerId);
+  }
+  
   document.getElementById('viewModal').classList.add('open');
 }
 
@@ -1275,17 +1655,16 @@ function renderQuickNotes() {
 }
 
 function audioCardHTML(n, created) {
-  console.log("DURATION RECEBIDA:", n.duration);
   return `<div class="audio-card">
     <div class="audio-player-wrap">
-      <div class="audio-label">🎙️ Nota de Áudio · ${fmtTime(Number(n.duration) || 0)}</div>
+      <div class="audio-label">🎙️ Nota de Áudio · ${formatTime(n.duration || 0)}</div>
       <div class="audio-controls">
         <button class="play-btn" id="playbtn_${n.id}" onclick="toggleAudioPlay('${n.id}')">▶</button>
         <div class="audio-progress-wrap">
           <div class="audio-progress" onclick="seekAudio('${n.id}', event)">
             <div class="audio-progress-fill" id="fill_${n.id}" style="width:0%"></div>
           </div>
-          <div class="audio-time" id="time_${n.id}">0:00 / ${fmtTime(Number(n.duration) || 0)}</div>
+          <div class="audio-time" id="time_${n.id}">0:00 / ${formatTime(n.duration || 0)}</div>
         </div>
       </div>
       <div class="audio-note-meta">🕐 ${created}</div>
@@ -1374,88 +1753,47 @@ function resetRecordUI() {
 
 async function toggleRecording() {
   if (mediaRecorder && mediaRecorder.state === 'recording') {
-
-    // ================= STOP =================
+    // STOP
     mediaRecorder.stop();
     stopRecordingTimer();
-
     document.getElementById('recordCircle').classList.remove('recording');
     document.getElementById('recordCircle').textContent = '⏹️';
     document.getElementById('recordStatus').textContent = 'Processando...';
     document.getElementById('waveform').classList.remove('recording');
-
   } else {
-
-    // ================= START =================
+    // START
     try {
-
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunks = [];
 
-      const mimeType = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/ogg;codecs=opus',
-        'audio/mp4',
-        'audio/ogg'
-      ].find(m => MediaRecorder.isTypeSupported(m)) || '';
+      // Pick best supported format
+      const mimeType = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4','audio/ogg']
+        .find(m => MediaRecorder.isTypeSupported(m)) || '';
 
       mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
-
-      mediaRecorder.ondataavailable = e => {
-        if (e.data.size > 0) audioChunks.push(e.data);
-      };
-
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
       mediaRecorder.onstop = async () => {
-
         stream.getTracks().forEach(t => t.stop());
-
         const type = mediaRecorder.mimeType || 'audio/webm';
         recordedBlob = new Blob(audioChunks, { type });
         recordedBase64 = await blobToBase64(recordedBlob);
-
+        // CORREÇÃO: Calcular duração real do áudio
         const audioUrl = URL.createObjectURL(recordedBlob);
         const audio = new Audio(audioUrl);
-
-        audio.addEventListener("loadedmetadata", () => {
-
-          // 🔥 CORREÇÃO DEFINITIVA DO INFINITY
-          if (!isFinite(audio.duration) || audio.duration === Infinity) {
-
-            audio.currentTime = 1e101;
-
-            audio.addEventListener("timeupdate", function handler() {
-              audio.removeEventListener("timeupdate", handler);
-
-              recordingSeconds = Math.round(audio.duration);
-              audio.currentTime = 0;
-
-              showRecordPreview(recordedBlob, type);
-              URL.revokeObjectURL(audioUrl);
-            });
-
-          } else {
-
-            recordingSeconds = Math.round(audio.duration);
-            showRecordPreview(recordedBlob, type);
-            URL.revokeObjectURL(audioUrl);
-
-          }
-
-        });
-
+        audio.onloadedmetadata = () => {
+          recordingSeconds = Math.round(audio.duration);
+          showRecordPreview(recordedBlob, type);
+          URL.revokeObjectURL(audioUrl);
+        };
       };
-
       mediaRecorder.start(100);
 
       document.getElementById('recordCircle').classList.add('recording');
       document.getElementById('recordCircle').textContent = '⏹️';
       document.getElementById('recordStatus').textContent = 'Gravando... toque para parar';
       document.getElementById('waveform').classList.add('recording');
-
       startRecordingTimer();
-
-    } catch (err) {
+    } catch(err) {
       showToast('❌ Sem permissão para o microfone');
     }
   }
@@ -1533,12 +1871,9 @@ function seekPreview(e) {
 }
 
 function fmtTime(s) {
-  if (!isFinite(s)) return '0:00';
-
-  s = Math.floor(Number(s));
+  if (!s || isNaN(s)) return '0:00';
   const m = Math.floor(s / 60);
-  const sec = String(s % 60).padStart(2, '0');
-
+  const sec = String(Math.floor(s % 60)).padStart(2, '0');
   return `${m}:${sec}`;
 }
 
@@ -1570,7 +1905,7 @@ async function saveAudioNote() {
 }
 
 // ---- Audio playback in list ----
-const audioPlayers = {}; // id -> { audio, interval }
+// const audioPlayers = {}; // id -> { audio, interval }
 
 function toggleAudioPlay(id) {
   const note = quickNotes.find(n => n.id === id);
